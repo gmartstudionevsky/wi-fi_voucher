@@ -1,0 +1,15 @@
+# Secrets
+.secrets/
+*.json
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+.env
+
+# Outputs
+out/
+tmp/
+*.pdf
+*.pptx~
