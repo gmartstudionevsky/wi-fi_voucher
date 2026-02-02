@@ -10,3 +10,4 @@ google-auth-httplib2==0.2.0
 google-api-python-client==2.145.0
 
 python-multipart==0.0.9
+pypdf==4.3.1
