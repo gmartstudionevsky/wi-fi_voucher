@@ -14,7 +14,7 @@ from pydantic import BaseModel, Field
 from .settings import settings
 from .sheets import fetch_and_delete_passwords
 from .qr import make_qr_png
-from .brochure import build_pptx, convert_pptx_to_pdf
+from .brochure import build_merged_pdf
 
 app = FastAPI(title="Guest brochure generator")
 
@@ -58,19 +58,19 @@ async def generate(req: GenerateRequest, background_tasks: BackgroundTasks):
             make_qr_png(pwd, str(qp))
             qr_paths.append(str(qp))
 
-        out_pptx = td / "brochures_out.pptx"
-        out_pdf_dir = td / "pdf"
-        out_pdf_dir.mkdir(parents=True, exist_ok=True)
+        out_pdf = td / "brochures.pdf"
 
-        build_pptx(
+        build_merged_pdf(
+            soffice_bin=settings.soffice_bin,
             template_ru=settings.template_ru_path,
             template_en=settings.template_en_path,
             ru_passwords=ru_passwords,
             en_passwords=en_passwords,
             qr_png_paths=qr_paths,
-            out_pptx_path=str(out_pptx),
+            work_dir=str(td),
+            out_pdf_path=str(out_pdf),
         )
-        pdf_path = convert_pptx_to_pdf(settings.soffice_bin, str(out_pptx), str(out_pdf_dir))
+        pdf_path = str(out_pdf)
 
     except Exception as e:
         shutil.rmtree(td, ignore_errors=True)
