@@ -4,6 +4,8 @@ import os
 import tempfile
 import asyncio
 from pathlib import Path
+import shutil
+from fastapi import BackgroundTasks
 
 from fastapi import FastAPI, HTTPException
 from fastapi.responses import FileResponse, HTMLResponse
@@ -28,12 +30,11 @@ def index():
     return html_path.read_text(encoding="utf-8")
 
 @app.post("/generate")
-async def generate(req: GenerateRequest):
+async def generate(req: GenerateRequest, background_tasks: BackgroundTasks):
     total = req.ru + req.en
     if total <= 0:
         raise HTTPException(status_code=400, detail="Need at least one brochure (ru+en > 0).")
 
-    # serialize to avoid parallel deletions in Google Sheet
     async with _lock:
         try:
             passwords = fetch_and_delete_passwords(
@@ -47,37 +48,40 @@ async def generate(req: GenerateRequest):
             raise HTTPException(status_code=500, detail=str(e))
 
     ru_passwords = passwords[:req.ru]
-    en_passwords = passwords[req.ru:req.ru+req.en]
+    en_passwords = passwords[req.ru:req.ru + req.en]
 
-    with tempfile.TemporaryDirectory() as td:
-        td_path = Path(td)
-        # generate QR pngs aligned with passwords order
+    td = Path(tempfile.mkdtemp(prefix="brochures_"))
+    try:
         qr_paths = []
         for i, pwd in enumerate(passwords, start=1):
-            qp = td_path / f"qr_{i:04d}.png"
+            qp = td / f"qr_{i:04d}.png"
             make_qr_png(pwd, str(qp))
             qr_paths.append(str(qp))
 
-        out_pptx = td_path / "brochures_out.pptx"
-        out_pdf_dir = td_path / "pdf"
+        out_pptx = td / "brochures_out.pptx"
+        out_pdf_dir = td / "pdf"
+        out_pdf_dir.mkdir(parents=True, exist_ok=True)
 
-        try:
-            build_pptx(
-                template_ru=settings.template_ru_path,
-                template_en=settings.template_en_path,
-                ru_passwords=ru_passwords,
-                en_passwords=en_passwords,
-                qr_png_paths=qr_paths,
-                out_pptx_path=str(out_pptx),
-            )
-            out_pdf_dir.mkdir(parents=True, exist_ok=True)
-            pdf_path = convert_pptx_to_pdf(settings.soffice_bin, str(out_pptx), str(out_pdf_dir))
-        except Exception as e:
-            raise HTTPException(status_code=500, detail=f"Render failed: {e}")
-
-        filename = "brochures.pdf"
-        return FileResponse(
-            pdf_path,
-            media_type="application/pdf",
-            filename=filename
+        build_pptx(
+            template_ru=settings.template_ru_path,
+            template_en=settings.template_en_path,
+            ru_passwords=ru_passwords,
+            en_passwords=en_passwords,
+            qr_png_paths=qr_paths,
+            out_pptx_path=str(out_pptx),
         )
+        pdf_path = convert_pptx_to_pdf(settings.soffice_bin, str(out_pptx), str(out_pdf_dir))
+
+    except Exception as e:
+        shutil.rmtree(td, ignore_errors=True)
+        raise HTTPException(status_code=500, detail=f"Render failed: {e}")
+
+    # удаляем папку ПОСЛЕ отдачи файла клиенту
+    background_tasks.add_task(shutil.rmtree, td, ignore_errors=True)
+
+    return FileResponse(
+        pdf_path,
+        media_type="application/pdf",
+        filename="brochures.pdf",
+        background=background_tasks,
+    )
