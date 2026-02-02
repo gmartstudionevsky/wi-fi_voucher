@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import shutil
 from pathlib import Path
+import copy
 from pptx import Presentation
 from pptx.enum.shapes import MSO_SHAPE_TYPE
 from pptx.util import Emu
@@ -26,15 +27,32 @@ def _remove_shape(shape):
     el = shape._element
     el.getparent().remove(el)
 
+def _replace_text_in_runs(text_frame, token: str, replacement: str) -> bool:
+    replaced = False
+    for paragraph in text_frame.paragraphs:
+        for run in paragraph.runs:
+            if token in run.text:
+                run.text = run.text.replace(token, replacement)
+                replaced = True
+        if replaced:
+            continue
+        full_text = "".join(run.text for run in paragraph.runs)
+        if token not in full_text:
+            continue
+        if paragraph.runs:
+            first_run = paragraph.runs[0]
+            for run in list(paragraph.runs)[1:]:
+                run._element.getparent().remove(run._element)
+            first_run.text = full_text.replace(token, replacement)
+            replaced = True
+    return replaced
+
 def _replace_password(slide, password: str):
     for sh in _iter_shapes_recursive(slide.shapes):
         if not sh.has_text_frame:
             continue
         if PASSWORD_TOKEN in sh.text_frame.text:
-            sh.text_frame.clear()
-            p = sh.text_frame.paragraphs[0]
-            run = p.add_run()
-            run.text = password
+            _replace_text_in_runs(sh.text_frame, PASSWORD_TOKEN, password)
 
 def _insert_qr(slide, qr_png_path: str):
     box = _find_textbox(slide, QR_TOKEN)
@@ -70,6 +88,54 @@ def render_single_brochure_pptx(template_path: str, password: str, qr_png_path: 
         _replace_password(slide, password)
         _insert_qr(slide, qr_png_path)
     prs.save(out_pptx_path)
+
+def _copy_slide(dest_prs: Presentation, src_slide):
+    layout = dest_prs.slide_layouts[0]
+    new_slide = dest_prs.slides.add_slide(layout)
+    for shape in list(new_slide.shapes):
+        shape._element.getparent().remove(shape._element)
+    for shape in src_slide.shapes:
+        new_slide.shapes._spTree.insert_element_before(copy.deepcopy(shape._element), "p:extLst")
+    for rel in src_slide.part.rels:
+        if "notesSlide" in rel.reltype or rel.reltype.endswith("/slideLayout"):
+            continue
+        new_slide.part.rels.add_relationship(rel.reltype, rel._target, rel.rId)
+    return new_slide
+
+def build_pptx(
+    template_ru: str,
+    template_en: str,
+    ru_passwords: list[str],
+    en_passwords: list[str],
+    qr_png_paths: list[str],
+    out_pptx_path: str
+):
+    ru_template = Presentation(template_ru)
+    en_template = Presentation(template_en)
+
+    out_prs = Presentation()
+    out_prs.slide_width = ru_template.slide_width
+    out_prs.slide_height = ru_template.slide_height
+
+    qr_idx = 0
+
+    for pwd in ru_passwords:
+        qr_path = qr_png_paths[qr_idx]
+        qr_idx += 1
+        for src_slide in ru_template.slides:
+            slide = _copy_slide(out_prs, src_slide)
+            _replace_password(slide, pwd)
+            _insert_qr(slide, qr_path)
+
+    for pwd in en_passwords:
+        qr_path = qr_png_paths[qr_idx]
+        qr_idx += 1
+        for src_slide in en_template.slides:
+            slide = _copy_slide(out_prs, src_slide)
+            _replace_password(slide, pwd)
+            _insert_qr(slide, qr_path)
+
+    out_prs.save(out_pptx_path)
 
 def convert_pptx_to_pdf(soffice_bin: str, pptx_path: str, out_dir: str) -> str:
     import subprocess
