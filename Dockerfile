@@ -4,7 +4,12 @@ FROM python:3.11-slim
 RUN apt-get update && apt-get install -y --no-install-recommends \
     libreoffice-impress libreoffice-core libreoffice-writer \
     fonts-dejavu fonts-liberation \
+    fontconfig \
     && rm -rf /var/lib/apt/lists/*
+
+# --- add Circe fonts ---
+COPY fonts/ /usr/local/share/fonts/circe/
+RUN fc-cache -f -v
 
 WORKDIR /app
 
