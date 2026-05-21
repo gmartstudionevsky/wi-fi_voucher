@@ -1,79 +1,81 @@
-# Guest brochure generator (RU/EN) — passwords + QR
+# ARTSTUDIO Wi-Fi vouchers
 
-Сервис генерирует один PDF для двусторонней печати:
-- пользователь вводит количество брошюр RU и EN
-- сервис берёт нужное количество паролей из Google Sheets (колонка A по умолчанию),
-  **удаляет использованные строки**
-- в PPTX-шаблонах подставляет пароль и заменяет маркер `{{QR_WIFI}}` на QR-код, содержащий **только текст пароля**
-- собирает итоговую презентацию (RU блок → EN блок) и конвертирует в PDF через LibreOffice (headless)
+Единый репозиторий для двух сценариев работы с Wi-Fi ваучерами:
 
-## Важно про редактирование дизайна
+- `/guest` — гостевая страница, где гость запрашивает ваучеры по ФИО, номеру апартамента и количеству устройств.
+- `/brochures` и `/` — страница для сотрудников, которая генерирует PDF-брошюры RU/EN с паролями и QR-кодами.
 
-Шаблоны лежат в:
-- `api/templates/brochure_ru.pptx`
-- `api/templates/brochure_en.pptx`
+Оба сценария используют одну Google Sheets-таблицу `127zHlLiojIdj60UJ42vgIU1SlCftqyB-15C9Ur26YL0`, но больше не меняют её разными способами. Выдача паролей централизована в Apps Script из `apps-script/Code.gs`.
 
-Можно менять всё, **кроме маркеров**:
-- `{{PASSWORD}}` — место, куда будет вставлен пароль
-- `{{QR_WIFI}}` — квадрат/блок, который будет заменён на QR-код
+## Как теперь согласованы запросы
 
-Если вы переместите `{{QR_WIFI}}` — QR будет вставлен в новое место автоматически.
+- Пароли лежат в листе `Пароли`, колонка A.
+- Выданные пароли записываются в лист `запрошено через QR-код`, колонка D.
+- Apps Script берёт `LockService`, читает архив выданных кодов и выбирает первые пароли из `Пароли`, которых ещё нет в архиве.
+- Строки из листа `Пароли` не удаляются. Это важно: гостевая страница и генератор брошюр больше не сдвигают друг другу строки.
+- PDF-генератор не подключается к Google Sheets напрямую. Он вызывает тот же Apps Script endpoint, что и гостевая страница.
 
-## Настройка Google Sheets
+## Apps Script
 
-По умолчанию сервис использует spreadsheet id из задачи:
-`127zHlLiojIdj60UJ42vgIU1SlCftqyB-15C9Ur26YL0`
+Код лежит в `apps-script/Code.gs`.
 
-Требования к таблице:
-- пароли лежат в одной колонке (по умолчанию A)
-- может быть заголовок `password` / `пароль` (будет пропущен)
-- пустые строки допускаются
+После изменения кода Apps Script нужно обновить существующий web app deployment новой версией. Простого сохранения файла недостаточно: публичный `/exec` endpoint продолжит выполнять старую версию, пока deployment не обновлён.
 
-### Секрет service account
+Проверка endpoint:
 
-**Не коммитьте JSON ключ в репозиторий.**
+```bash
+curl https://script.google.com/macros/s/<DEPLOYMENT_ID>/exec
+```
 
-1) Создайте локально папку `.secrets/` (она в `.gitignore`)  
-2) Положите файл ключа как: `.secrets/google_sa.json`  
-3) Запускайте контейнер, примонтировав файл в `/run/secrets/google_sa.json`
+Ожидаемый ответ содержит `status: "ok"` и `version: "2026-05-21-unified-reservations"`.
 
 ## Переменные окружения
 
-- `GOOGLE_SA_JSON_PATH` — путь к service-account json в контейнере (по умолчанию `/run/secrets/google_sa.json`)
-- `SPREADSHEET_ID` — id таблицы (по умолчанию уже задан)
-- `SHEET_NAME` — имя листа (опционально, по умолчанию берётся первый лист)
-- `PASSWORD_COLUMN` — буква колонки (по умолчанию `A`)
-- `TEMPLATE_RU_PATH`, `TEMPLATE_EN_PATH` — пути к PPTX шаблонам (если переименуете)
-- `SOFFICE_BIN` — бинарник LibreOffice (по умолчанию `soffice`)
+- `VOUCHER_RESERVATION_URL` — URL Apps Script web app. По умолчанию используется текущий URL из прежней гостевой страницы.
+- `VOUCHER_REQUEST_TIMEOUT_SECONDS` — таймаут запроса к Apps Script, по умолчанию `30`.
+- `TEMPLATE_RU_PATH`, `TEMPLATE_EN_PATH` — пути к PPTX-шаблонам.
+- `SOFFICE_BIN` — бинарник LibreOffice, по умолчанию `soffice`.
 
-## Локальный запуск (без Docker)
+Переменные `GOOGLE_SA_JSON_PATH`, `SPREADSHEET_ID`, `SHEET_NAME`, `PASSWORD_COLUMN` оставлены для совместимости и локальных экспериментов, но основной поток резервации теперь идёт через Apps Script.
 
-> Нужен установленный LibreOffice с `soffice` в PATH.
+## Шаблоны брошюр
+
+Шаблоны лежат в:
+
+- `api/templates/brochure_ru.pptx`
+- `api/templates/brochure_en.pptx`
+
+Можно менять дизайн, но нужно сохранить маркеры:
+
+- `{{PASSWORD}}` — место для пароля.
+- `{{QR_WIFI}}` — блок, который будет заменён на QR-код с текстом пароля.
+
+## Локальный запуск
+
+Нужен установленный LibreOffice с `soffice` в PATH.
 
 ```bash
 python -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
-
-export GOOGLE_SA_JSON_PATH=/absolute/path/to/google_sa.json
 uvicorn api.main:app --reload --port 8080
 ```
 
-Откройте: http://localhost:8080
+Открыть:
 
-## Запуск в Docker
+- http://localhost:8080/brochures
+- http://localhost:8080/guest
+
+## Docker
 
 ```bash
-docker build -t brochure-gen:latest .
+docker build -t artstudio-wifi-vouchers:latest .
 
 docker run --rm -p 8080:8080 \
-  -e GOOGLE_SA_JSON_PATH=/run/secrets/google_sa.json \
-  -e SPREADSHEET_ID=127zHlLiojIdj60UJ42vgIU1SlCftqyB-15C9Ur26YL0 \
-  -v "$PWD/.secrets/google_sa.json:/run/secrets/google_sa.json:ro" \
-  brochure-gen:latest
+  -e VOUCHER_RESERVATION_URL=https://script.google.com/macros/s/<DEPLOYMENT_ID>/exec \
+  artstudio-wifi-vouchers:latest
 ```
 
 ## GitHub Actions
 
-В репозитории есть workflow `.github/workflows/docker-ghcr.yml`, который собирает и пушит Docker-образ в GHCR на каждый push в `main`.
-Дальше образ можно запускать на любом сервере/платформе, где есть Docker.
+Workflow `.github/workflows/docker-ghcr.yml` собирает и публикует Docker-образ в GHCR на каждый push в `main`.
