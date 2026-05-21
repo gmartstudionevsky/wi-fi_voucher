@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import os
 import tempfile
 import asyncio
 from pathlib import Path
@@ -12,22 +11,38 @@ from fastapi.responses import FileResponse, HTMLResponse
 from pydantic import BaseModel, Field
 
 from .settings import settings
-from .sheets import fetch_and_delete_passwords
+from .reservations import VoucherReservationError, reserve_vouchers
 from .qr import make_qr_png
 from .brochure import build_merged_pdf
 
-app = FastAPI(title="Guest brochure generator")
+app = FastAPI(title="ARTSTUDIO Wi-Fi vouchers")
 
 _lock = asyncio.Lock()
+
 
 class GenerateRequest(BaseModel):
     ru: int = Field(ge=0, le=500)
     en: int = Field(ge=0, le=500)
 
+
+def read_web_file(name: str) -> str:
+    return Path("web", name).read_text(encoding="utf-8")
+
+
 @app.get("/", response_class=HTMLResponse)
 def index():
-    html_path = Path("web/index.html")
-    return html_path.read_text(encoding="utf-8")
+    return read_web_file("index.html")
+
+
+@app.get("/brochures", response_class=HTMLResponse)
+def brochures():
+    return read_web_file("index.html")
+
+
+@app.get("/guest", response_class=HTMLResponse)
+def guest():
+    return read_web_file("guest.html")
+
 
 @app.post("/generate")
 async def generate(req: GenerateRequest, background_tasks: BackgroundTasks):
@@ -37,15 +52,16 @@ async def generate(req: GenerateRequest, background_tasks: BackgroundTasks):
 
     async with _lock:
         try:
-            passwords = fetch_and_delete_passwords(
-                sa_json_path=settings.google_sa_json_path,
-                spreadsheet_id=settings.spreadsheet_id,
-                sheet_name=settings.sheet_name,
-                column=settings.password_column,
-                count=total,
+            passwords = await asyncio.to_thread(
+                reserve_vouchers,
+                total,
+                "brochure-generator",
+                {"ru": req.ru, "en": req.en},
             )
-        except Exception as e:
-            raise HTTPException(status_code=500, detail=str(e))
+        except VoucherReservationError as error:
+            message = str(error)
+            status_code = 409 if "voucher" in message.lower() or "пар" in message.lower() else 502
+            raise HTTPException(status_code=status_code, detail=message) from error
 
     ru_passwords = passwords[:req.ru]
     en_passwords = passwords[req.ru:req.ru + req.en]
@@ -72,11 +88,10 @@ async def generate(req: GenerateRequest, background_tasks: BackgroundTasks):
         )
         pdf_path = str(out_pdf)
 
-    except Exception as e:
+    except Exception as error:
         shutil.rmtree(td, ignore_errors=True)
-        raise HTTPException(status_code=500, detail=f"Render failed: {e}")
+        raise HTTPException(status_code=500, detail=f"Render failed: {error}") from error
 
-    # удаляем папку ПОСЛЕ отдачи файла клиенту
     background_tasks.add_task(shutil.rmtree, td, ignore_errors=True)
 
     return FileResponse(
