@@ -9,215 +9,53 @@
     @font-face{font-family:'Circe';src:url('./fonts/circe-light.woff2') format('woff2');font-weight:300;font-style:normal}
     @font-face{font-family:'Circe';src:url('./fonts/circe.woff2') format('woff2');font-weight:400;font-style:normal}
     @font-face{font-family:'Circe';src:url('./fonts/circe-bold.woff2') format('woff2');font-weight:700;font-style:normal}
-    :root{--brand:#c49a5f;--brand-dark:#a47f48;--ink:#262d36;--muted:#6c757d;--surface:#f8f9fa;--danger:#b42318;--ok:#1f7a3b}
-    *{box-sizing:border-box}
-    body{margin:0;font-family:'Circe',Arial,sans-serif;background:#fff;color:var(--ink)}
-    header{display:flex;flex-direction:column;align-items:center;gap:1rem;padding:2rem 1rem 1rem}
-    .main-logo{max-width:200px;height:auto}
-    .language-toggle{display:flex;gap:.75rem;justify-content:center}
-    .language-toggle button{width:auto;padding:.65rem 1.25rem;border:1px solid var(--brand);background:#fff;color:var(--brand);font-weight:700;border-radius:999px;cursor:pointer}
-    .language-toggle button[aria-pressed="true"]{background:var(--brand);color:#fff}
-    h1{font-size:2rem;font-weight:400;text-align:center;margin:.5rem 0;color:var(--ink)}
-    .intro,main{max-width:640px;margin:1.25rem auto;background:#fff;padding:1.5rem;border-radius:8px;box-shadow:0 4px 16px rgba(0,0,0,.08)}
-    .intro{line-height:1.5}
-    .intro p{margin:0 0 1rem}
-    .intro ul{margin:.5rem 0 0;padding-left:1.2rem}
-    form{display:grid;gap:1rem}
-    label{display:block;font-size:1.2rem;margin-bottom:.4rem}
-    input,select,button{width:100%;padding:.8rem;border:1px solid #ccd2d8;border-radius:8px;font:1rem 'Circe',Arial,sans-serif}
-    button{border:none;background:var(--brand);color:#fff;font-weight:700;cursor:pointer}
-    button:hover{background:var(--brand-dark)}
-    button:disabled{opacity:.7;cursor:not-allowed}
-    .status{margin-top:1rem;padding:1rem;border-radius:8px;background:var(--surface);line-height:1.5}
-    .error{color:var(--danger);font-weight:700}
-    .success{color:var(--ok);font-weight:700}
-    .voucher-list{display:grid;gap:.5rem;margin:.75rem 0 0;padding:0;list-style:none}
-    .voucher-list li{display:flex;justify-content:space-between;gap:.75rem;align-items:center;background:#fff;border-left:4px solid var(--brand);padding:.65rem;border-radius:6px}
-    code{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;word-break:break-all}
-    .small-button{width:auto;padding:.45rem .75rem;border-radius:999px;font-size:.9rem}
+    :root{--brand:#c49a5f;--brand-dark:#a47f48;--ink:#262d36;--surface:#f8f9fa;--danger:#b42318;--ok:#1f7a3b}
+    *{box-sizing:border-box} body{margin:0;font-family:'Circe',Arial,sans-serif;background:#fff;color:var(--ink)}
+    header{display:flex;flex-direction:column;align-items:center;gap:1rem;padding:2rem 1rem 1rem}.main-logo{max-width:200px;height:auto}
+    .language-toggle{display:flex;gap:.75rem}.language-toggle button{width:auto;padding:.65rem 1.25rem;border:1px solid var(--brand);background:#fff;color:var(--brand);font-weight:700;border-radius:999px;cursor:pointer}.language-toggle button[aria-pressed="true"]{background:var(--brand);color:#fff}
+    h1{font-size:2rem;font-weight:400;text-align:center;margin:.5rem 0}.intro,main{max-width:640px;margin:1.25rem auto;background:#fff;padding:1.5rem;border-radius:8px;box-shadow:0 4px 16px rgba(0,0,0,.08)}.intro{line-height:1.5}.intro p{margin:0 0 1rem}.intro ul{margin:.5rem 0 0;padding-left:1.2rem}
+    form{display:grid;gap:1rem}label{display:block;font-size:1.2rem;margin-bottom:.4rem}input,select,button{width:100%;padding:.8rem;border:1px solid #ccd2d8;border-radius:8px;font:1rem 'Circe',Arial,sans-serif}button{border:none;background:var(--brand);color:#fff;font-weight:700;cursor:pointer}button:hover{background:var(--brand-dark)}button:disabled{opacity:.7;cursor:not-allowed}
+    .status{margin-top:1rem;padding:1rem;border-radius:8px;background:var(--surface);line-height:1.5}.error{color:var(--danger);font-weight:700}.success{color:var(--ok);font-weight:700}.voucher-list{display:grid;gap:.5rem;margin:.75rem 0 0;padding:0;list-style:none}.voucher-list li{display:flex;justify-content:space-between;gap:.75rem;align-items:center;background:#fff;border-left:4px solid var(--brand);padding:.65rem;border-radius:6px}code{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;word-break:break-all}.small-button{width:auto;padding:.45rem .75rem;border-radius:999px;font-size:.9rem}
     @media (max-width:640px){header{padding-top:1.25rem}.main-logo{max-width:150px}h1{font-size:1.5rem}.intro,main{margin:1rem;padding:1rem;box-shadow:none}}
   </style>
 </head>
 <body>
   <header>
     <img src="https://static.tildacdn.com/tild3763-3662-4234-a161-616361613065/____1.png" alt="ARTSTUDIO Nevsky" class="main-logo">
-    <div class="language-toggle" role="group" aria-label="Language">
-      <button id="ru-btn" type="button" aria-pressed="true">Русский</button>
-      <button id="en-btn" type="button" aria-pressed="false">English</button>
-    </div>
+    <div class="language-toggle" role="group" aria-label="Language"><button id="ru-btn" type="button" aria-pressed="true">Русский</button><button id="en-btn" type="button" aria-pressed="false">English</button></div>
     <h1 id="title">Wi-Fi Доступ</h1>
   </header>
-
   <section class="intro" id="intro"></section>
-
   <main>
     <form id="wifi-form" novalidate>
-      <div>
-        <label id="fio-label" for="fio">ФИО</label>
-        <input type="text" id="fio" name="fio" maxlength="120" autocomplete="name" required>
-      </div>
-      <div>
-        <label id="apt-label" for="apartment">№ Апартамента</label>
-        <input type="text" id="apartment" name="apartment" inputmode="numeric" pattern="[0-9]{1,3}" maxlength="3" autocomplete="off" required>
-      </div>
-      <div>
-        <label id="devices-label" for="devices">Количество устройств</label>
-        <select id="devices" name="devices" required></select>
-      </div>
+      <div><label id="fio-label" for="fio">ФИО</label><input type="text" id="fio" maxlength="120" autocomplete="name" required></div>
+      <div><label id="apt-label" for="apartment">№ Апартамента</label><input type="text" id="apartment" inputmode="numeric" pattern="[0-9]{1,3}" maxlength="3" autocomplete="off" required></div>
+      <div><label id="devices-label" for="devices">Количество устройств</label><select id="devices" required></select></div>
       <button type="submit" id="submit-button">Запросить ваучер</button>
     </form>
     <div id="status" class="status" hidden></div>
   </main>
-
   <script>
-    const CONFIG = Object.freeze({
-      scriptUrl: 'https://script.google.com/macros/s/AKfycbzaAM4jvFkdfV5FGANK7FTzvJ2C0I1VaU5dInsQhyAB37g71jMyoR7PeESjQc5Jwd7JnA/exec',
-      maxDevices: 20,
-      maxApartment: 999,
-      requestTimeoutMs: 15000
-    });
-
+    const CONFIG = Object.freeze({ scriptUrl: 'https://script.google.com/macros/s/AKfycbzaAM4jvFkdfV5FGANK7FTzvJ2C0I1VaU5dInsQhyAB37g71jMyoR7PeESjQc5Jwd7JnA/exec', maxDevices: 20, maxApartment: 999, requestTimeoutMs: 15000 });
     const state = { language: 'ru', vouchers: [] };
-    const el = {
-      html: document.documentElement,
-      ruBtn: document.getElementById('ru-btn'),
-      enBtn: document.getElementById('en-btn'),
-      title: document.getElementById('title'),
-      intro: document.getElementById('intro'),
-      form: document.getElementById('wifi-form'),
-      fio: document.getElementById('fio'),
-      apartment: document.getElementById('apartment'),
-      devices: document.getElementById('devices'),
-      fioLabel: document.getElementById('fio-label'),
-      aptLabel: document.getElementById('apt-label'),
-      devicesLabel: document.getElementById('devices-label'),
-      submit: document.getElementById('submit-button'),
-      status: document.getElementById('status')
-    };
-
-    const copyIcon = '<svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"></rect><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"></path></svg>';
-
+    const el = { html: document.documentElement, ruBtn: document.getElementById('ru-btn'), enBtn: document.getElementById('en-btn'), title: document.getElementById('title'), intro: document.getElementById('intro'), form: document.getElementById('wifi-form'), fio: document.getElementById('fio'), apartment: document.getElementById('apartment'), devices: document.getElementById('devices'), fioLabel: document.getElementById('fio-label'), aptLabel: document.getElementById('apt-label'), devicesLabel: document.getElementById('devices-label'), submit: document.getElementById('submit-button'), status: document.getElementById('status') };
     const translations = {
-      ru: {
-        title: 'Wi-Fi Доступ', fio: 'ФИО', apartment: '№ Апартамента', devices: 'Количество устройств', submit: 'Запросить ваучер', loading: 'Запрашиваем...', fields: 'Пожалуйста, заполните все поля корректно.', unavailable: 'Ваучеры временно недоступны. Обратитесь на ресепшен.', copied: 'Скопировано', copy: 'Скопировать', placeholder: 'Выберите количество устройств',
-        intro: '<p>Добро пожаловать в ARTSTUDIO Nevsky. Заполните форму, чтобы получить Wi-Fi ваучер.</p><p>Подключитесь к сети <strong>ARTSTUDIO_Nevsky</strong> и введите полученный код.</p><ul><li>Один ваучер работает до 5 устройств</li><li>Для большего количества устройств система выдаст несколько ваучеров</li></ul>'
-      },
-      en: {
-        title: 'Wi-Fi Access', fio: 'Full Name', apartment: 'Apartment Number', devices: 'Number of Devices', submit: 'Request Voucher', loading: 'Requesting...', fields: 'Please fill in all fields correctly.', unavailable: 'Vouchers are temporarily unavailable. Please contact reception.', copied: 'Copied', copy: 'Copy', placeholder: 'Select number of devices',
-        intro: '<p>Welcome to ARTSTUDIO Nevsky. Fill in the form to get your Wi-Fi voucher.</p><p>Connect to <strong>ARTSTUDIO_Nevsky</strong> and enter the code.</p><ul><li>One voucher works for up to 5 devices</li><li>For more devices, the system will issue several vouchers</li></ul>'
-      }
+      ru: { title:'Wi-Fi Доступ', fio:'ФИО', apartment:'№ Апартамента', devices:'Количество устройств', submit:'Запросить ваучер', loading:'Запрашиваем...', fields:'Пожалуйста, заполните все поля корректно.', unavailable:'Ваучеры временно недоступны. Обратитесь на ресепшен.', copied:'Скопировано', copy:'Скопировать', placeholder:'Выберите количество устройств', intro:['Добро пожаловать в ARTSTUDIO Nevsky. Заполните форму, чтобы получить Wi-Fi ваучер.','Подключитесь к сети ARTSTUDIO_Nevsky и введите полученный код.'], bullets:['Один ваучер работает до 5 устройств','Для большего количества устройств система выдаст несколько ваучеров'] },
+      en: { title:'Wi-Fi Access', fio:'Full Name', apartment:'Apartment Number', devices:'Number of Devices', submit:'Request Voucher', loading:'Requesting...', fields:'Please fill in all fields correctly.', unavailable:'Vouchers are temporarily unavailable. Please contact reception.', copied:'Copied', copy:'Copy', placeholder:'Select number of devices', intro:['Welcome to ARTSTUDIO Nevsky. Fill in the form to get your Wi-Fi voucher.','Connect to ARTSTUDIO_Nevsky and enter the code.'], bullets:['One voucher works for up to 5 devices','For more devices, the system will issue several vouchers'] }
     };
-
-    for (let count = 0; count <= CONFIG.maxDevices; count += 1) {
-      const option = document.createElement('option');
-      option.value = count === 0 ? '' : String(count);
-      option.textContent = count === 0 ? '' : String(count);
-      el.devices.appendChild(option);
-    }
-
-    function text() { return translations[state.language]; }
-
-    function sanitizeApartment(value) {
-      return value.replace(/\D/g, '').slice(0, 3);
-    }
-
-    function updateLanguage(language) {
-      state.language = language;
-      const t = text();
-      el.html.lang = language;
-      el.title.textContent = t.title;
-      el.intro.innerHTML = t.intro;
-      el.fioLabel.textContent = t.fio;
-      el.aptLabel.textContent = t.apartment;
-      el.devicesLabel.textContent = t.devices;
-      el.submit.textContent = t.submit;
-      el.devices.options[0].textContent = t.placeholder;
-      el.ruBtn.setAttribute('aria-pressed', String(language === 'ru'));
-      el.enBtn.setAttribute('aria-pressed', String(language === 'en'));
-      if (state.vouchers.length) renderVouchers(state.vouchers);
-    }
-
-    function readPayload() {
-      const fio = el.fio.value.trim().replace(/\s+/g, ' ');
-      const apartment = sanitizeApartment(el.apartment.value.trim());
-      const numDevices = Number.parseInt(el.devices.value, 10);
-      const apartmentNumber = Number.parseInt(apartment, 10);
-      el.apartment.value = apartment;
-      if (!fio || fio.length > 120) return null;
-      if (!Number.isInteger(apartmentNumber) || apartmentNumber < 1 || apartmentNumber > CONFIG.maxApartment) return null;
-      if (!Number.isInteger(numDevices) || numDevices < 1 || numDevices > CONFIG.maxDevices) return null;
-      return { fio, apartment, num_devices: numDevices, language: state.language };
-    }
-
-    function showStatus(html, type) {
-      el.status.hidden = false;
-      el.status.className = 'status ' + (type || '');
-      el.status.innerHTML = html;
-    }
-
-    async function requestVouchers(payload) {
-      const controller = new AbortController();
-      const timeoutId = window.setTimeout(() => controller.abort(), CONFIG.requestTimeoutMs);
-      try {
-        const response = await fetch(CONFIG.scriptUrl, {
-          method: 'POST',
-          body: JSON.stringify(payload),
-          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-          signal: controller.signal
-        });
-        if (!response.ok) throw new Error('HTTP ' + response.status);
-        return JSON.parse(await response.text());
-      } finally {
-        window.clearTimeout(timeoutId);
-      }
-    }
-
-    async function copyVoucher(value, button) {
-      await navigator.clipboard.writeText(value);
-      const original = button.innerHTML;
-      button.textContent = text().copied;
-      window.setTimeout(() => { button.innerHTML = original; }, 1200);
-    }
-
-    function renderVouchers(vouchers) {
-      state.vouchers = vouchers;
-      const rows = vouchers.map((voucher, index) => `<li><code>${voucher}</code><button class="small-button" type="button" data-index="${index}" title="${text().copy}" aria-label="${text().copy}">${copyIcon}</button></li>`).join('');
-      showStatus(`<div class="success">${text().title}</div><p>ARTSTUDIO_Nevsky</p><ul class="voucher-list">${rows}</ul>`, '');
-    }
-
-    el.apartment.addEventListener('input', () => { el.apartment.value = sanitizeApartment(el.apartment.value); });
-    el.ruBtn.addEventListener('click', () => updateLanguage('ru'));
-    el.enBtn.addEventListener('click', () => updateLanguage('en'));
-    el.status.addEventListener('click', (event) => {
-      const button = event.target.closest('button[data-index]');
-      if (!button) return;
-      copyVoucher(state.vouchers[Number(button.dataset.index)], button).catch(() => {});
-    });
-
-    el.form.addEventListener('submit', async (event) => {
-      event.preventDefault();
-      const payload = readPayload();
-      if (!payload) {
-        showStatus(text().fields, 'error');
-        return;
-      }
-      el.submit.disabled = true;
-      el.submit.textContent = text().loading;
-      try {
-        const result = await requestVouchers(payload);
-        if (result && Array.isArray(result.vouchers) && result.vouchers.length) {
-          renderVouchers(result.vouchers.map(String));
-        } else {
-          showStatus(text().unavailable, 'error');
-        }
-      } catch (error) {
-        showStatus(text().unavailable, 'error');
-      } finally {
-        el.submit.disabled = false;
-        el.submit.textContent = text().submit;
-      }
-    });
-
+    for (let count = 0; count <= CONFIG.maxDevices; count += 1) { const option = document.createElement('option'); option.value = count === 0 ? '' : String(count); option.textContent = count === 0 ? '' : String(count); el.devices.appendChild(option); }
+    function text(){ return translations[state.language]; }
+    function sanitizeApartment(value){ return value.replace(/\D/g, '').slice(0, 3); }
+    function setText(node, value){ node.textContent = value; }
+    function renderIntro(){ const t = text(); el.intro.replaceChildren(); t.intro.forEach((line) => { const p = document.createElement('p'); p.textContent = line; el.intro.appendChild(p); }); const ul = document.createElement('ul'); t.bullets.forEach((line) => { const li = document.createElement('li'); li.textContent = line; ul.appendChild(li); }); el.intro.appendChild(ul); }
+    function updateLanguage(language){ state.language = language; const t = text(); el.html.lang = language; setText(el.title, t.title); setText(el.fioLabel, t.fio); setText(el.aptLabel, t.apartment); setText(el.devicesLabel, t.devices); setText(el.submit, t.submit); el.devices.options[0].textContent = t.placeholder; el.ruBtn.setAttribute('aria-pressed', String(language === 'ru')); el.enBtn.setAttribute('aria-pressed', String(language === 'en')); renderIntro(); if (state.vouchers.length) renderVouchers(state.vouchers); }
+    function readPayload(){ const fio = el.fio.value.trim().replace(/\s+/g, ' '); const apartment = sanitizeApartment(el.apartment.value.trim()); const numDevices = Number.parseInt(el.devices.value, 10); const apartmentNumber = Number.parseInt(apartment, 10); el.apartment.value = apartment; if (!fio || fio.length > 120) return null; if (!Number.isInteger(apartmentNumber) || apartmentNumber < 1 || apartmentNumber > CONFIG.maxApartment) return null; if (!Number.isInteger(numDevices) || numDevices < 1 || numDevices > CONFIG.maxDevices) return null; return { fio, apartment, num_devices: numDevices, language: state.language }; }
+    function showMessage(message, type){ el.status.hidden = false; el.status.className = 'status ' + (type || ''); el.status.replaceChildren(); const p = document.createElement('p'); p.textContent = message; el.status.appendChild(p); }
+    async function requestVouchers(payload){ const controller = new AbortController(); const timeoutId = window.setTimeout(() => controller.abort(), CONFIG.requestTimeoutMs); try { const response = await fetch(CONFIG.scriptUrl, { method:'POST', body:JSON.stringify(payload), headers:{ 'Content-Type':'text/plain;charset=utf-8' }, signal:controller.signal }); if (!response.ok) throw new Error('HTTP ' + response.status); return JSON.parse(await response.text()); } finally { window.clearTimeout(timeoutId); } }
+    async function copyVoucher(value, button){ await navigator.clipboard.writeText(value); const previous = button.textContent; button.textContent = text().copied; window.setTimeout(() => { button.textContent = previous; }, 1200); }
+    function renderVouchers(vouchers){ state.vouchers = vouchers; el.status.hidden = false; el.status.className = 'status'; el.status.replaceChildren(); const ok = document.createElement('div'); ok.className = 'success'; ok.textContent = text().title; const network = document.createElement('p'); network.textContent = 'ARTSTUDIO_Nevsky'; const list = document.createElement('ul'); list.className = 'voucher-list'; vouchers.forEach((voucher, index) => { const item = document.createElement('li'); const code = document.createElement('code'); code.textContent = voucher; const button = document.createElement('button'); button.type = 'button'; button.className = 'small-button'; button.textContent = text().copy; button.addEventListener('click', () => copyVoucher(voucher, button).catch(() => {})); item.append(code, button); list.appendChild(item); }); el.status.append(ok, network, list); }
+    el.apartment.addEventListener('input', () => { el.apartment.value = sanitizeApartment(el.apartment.value); }); el.ruBtn.addEventListener('click', () => updateLanguage('ru')); el.enBtn.addEventListener('click', () => updateLanguage('en'));
+    el.form.addEventListener('submit', async (event) => { event.preventDefault(); const payload = readPayload(); if (!payload) { showMessage(text().fields, 'error'); return; } el.submit.disabled = true; el.submit.textContent = text().loading; try { const result = await requestVouchers(payload); if (result && Array.isArray(result.vouchers) && result.vouchers.length) renderVouchers(result.vouchers.map(String)); else showMessage(text().unavailable, 'error'); } catch (error) { showMessage(text().unavailable, 'error'); } finally { el.submit.disabled = false; el.submit.textContent = text().submit; } });
     updateLanguage('ru');
   </script>
 </body>
