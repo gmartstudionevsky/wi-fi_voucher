@@ -5,9 +5,5 @@ python-pptx==0.6.23
 qrcode[pil]==7.4.2
 Pillow==10.4.0
 
-google-auth==2.34.0
-google-auth-httplib2==0.2.0
-google-api-python-client==2.145.0
-
-python-multipart==0.0.9
 pypdf==4.3.1
+psycopg[binary]==3.3.4

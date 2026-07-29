@@ -137,18 +137,37 @@ def build_pptx(
 
     out_prs.save(out_pptx_path)
 
-def convert_pptx_to_pdf(soffice_bin: str, pptx_path: str, out_dir: str) -> str:
+def convert_pptx_to_pdf(
+    soffice_bin: str,
+    pptx_path: str,
+    out_dir: str,
+    timeout_seconds: int = 120,
+) -> str:
     import subprocess
     pptx_path = str(Path(pptx_path).resolve())
     out_dir = str(Path(out_dir).resolve())
+    profile_dir = Path(out_dir) / f"lo_profile_{Path(pptx_path).stem}"
+    profile_dir.mkdir(parents=True, exist_ok=True)
     cmd = [
         soffice_bin,
+        f"-env:UserInstallation={profile_dir.resolve().as_uri()}",
         "--headless", "--nologo", "--nofirststartwizard", "--norestore",
         "--convert-to", "pdf",
         "--outdir", out_dir,
         pptx_path
     ]
-    proc = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+    try:
+        proc = subprocess.run(
+            cmd,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+            timeout=timeout_seconds,
+        )
+    except subprocess.TimeoutExpired as error:
+        raise RuntimeError(
+            f"LibreOffice conversion timed out after {timeout_seconds} seconds."
+        ) from error
     if proc.returncode != 0:
         raise RuntimeError(f"LibreOffice convert failed ({proc.returncode}): {proc.stderr.strip() or proc.stdout.strip()}")
     pdf_path = str(Path(out_dir) / (Path(pptx_path).stem + ".pdf"))

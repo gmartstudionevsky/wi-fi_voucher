@@ -18,8 +18,17 @@ RUN pip install --no-cache-dir -r /app/requirements.txt
 
 COPY api /app/api
 COPY web /app/web
+COPY fonts /app/fonts
+
+RUN useradd --create-home --uid 10001 appuser \
+    && mkdir -p /data \
+    && chown -R appuser:appuser /app /data
 
 ENV PYTHONUNBUFFERED=1
+ENV DATABASE_PATH=/data/vouchers.db
+VOLUME ["/data"]
 EXPOSE 8080
 
-CMD ["sh", "-c", "uvicorn api.main:app --host 0.0.0.0 --port ${PORT:-10000}"]
+USER appuser
+
+CMD ["sh", "-c", "uvicorn api.main:app --host 0.0.0.0 --port ${PORT:-8080}"]

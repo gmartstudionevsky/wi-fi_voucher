@@ -10,7 +10,25 @@ permissions:
   packages: write
 
 jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+      - name: Run unit tests
+        run: python -m unittest discover -s tests -v
+      - name: Compile Python
+        run: python -m compileall -q api tests scripts
+      - name: Check browser JavaScript syntax
+        run: node -e "const fs=require('fs');const h=fs.readFileSync('web/index.html','utf8');const m=h.match(/<script>([\\s\\S]*?)<\\/script>/);new Function(m[1]);"
+
   build:
+    needs: test
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4

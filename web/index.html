@@ -1,105 +1,1226 @@
 <!doctype html>
 <html lang="ru">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>ARTSTUDIO — печать брошюр</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" href="data:,">
+  <title>ARTSTUDIO — Wi‑Fi пароли</title>
   <style>
-    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; margin: 0; background: #f6f7f9; color: #111; }
-    .wrap { max-width: 720px; margin: 40px auto; padding: 0 16px; }
-    .card { background: #fff; border-radius: 14px; padding: 20px; box-shadow: 0 8px 28px rgba(0,0,0,.08); }
-    h1 { font-size: 20px; margin: 0 0 14px; }
-    p { margin: 10px 0; line-height: 1.4; }
-    .row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 14px; }
-    label { font-size: 13px; color: #333; display:block; margin-bottom: 6px; }
-    input { width: 100%; box-sizing: border-box; padding: 10px 12px; font-size: 16px; border: 1px solid #cfd6df; border-radius: 10px; }
-    button { margin-top: 16px; width: 100%; padding: 12px 14px; font-size: 16px; border: 0; border-radius: 12px; background: #111; color: #fff; cursor: pointer; }
-    button:disabled { opacity: .55; cursor: not-allowed; }
-    .hint { font-size: 12px; color: #555; }
-    .err { margin-top: 12px; color: #b00020; font-size: 13px; }
-    .ok { margin-top: 12px; color: #0a7a2f; font-size: 13px; }
-    .footer { margin-top: 14px; font-size: 12px; color: #666; }
-    code { background: #f0f2f5; padding: 2px 6px; border-radius: 6px; }
+    @font-face {
+      font-family: "Circe";
+      src: url("/assets/circe.ttf") format("truetype");
+      font-weight: 400;
+      font-display: swap;
+    }
+    @font-face {
+      font-family: "Circe";
+      src: url("/assets/circe-bold.ttf") format("truetype");
+      font-weight: 700;
+      font-display: swap;
+    }
+    :root {
+      color-scheme: light;
+      --ink: #292b37;
+      --ink-strong: #171821;
+      --muted: #767576;
+      --brand-soft: #ebe7e7;
+      --brand-pale: #f6f4f4;
+      --line: #dedbdc;
+      --line-strong: #c7c3c5;
+      --white: #ffffff;
+      --danger: #a53a42;
+      --danger-soft: #fbf1f2;
+      --warning: #9b6925;
+      --warning-soft: #faf4e9;
+      --success: #455c50;
+      --success-soft: #edf2ef;
+      --focus: rgba(41, 43, 55, 0.16);
+      --radius: 12px;
+      --shadow: 0 18px 54px rgba(41, 43, 55, 0.12);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-width: 320px;
+      background: var(--white);
+      color: var(--ink);
+      font: 15px/1.45 "Circe", Arial, sans-serif;
+    }
+    button, input, textarea { font: inherit; }
+    button { color: inherit; }
+    button:focus-visible, input:focus-visible, textarea:focus-visible {
+      outline: 3px solid var(--focus);
+      outline-offset: 2px;
+    }
+    .app-shell { min-height: 100vh; }
+    .topbar {
+      min-height: 100px;
+      display: grid;
+      grid-template-columns: minmax(260px, 1fr) auto auto;
+      align-items: center;
+      gap: 28px;
+      padding: 20px 32px;
+      border-bottom: 1px solid var(--line);
+      background: rgba(255, 255, 255, 0.98);
+    }
+    .brandline { display: flex; align-items: baseline; gap: 22px; min-width: 0; }
+    h1 {
+      margin: 0;
+      color: var(--ink-strong);
+      font-size: 32px;
+      font-weight: 400;
+      letter-spacing: -0.025em;
+      white-space: nowrap;
+    }
+    .hotel {
+      color: var(--muted);
+      font-size: 13px;
+      letter-spacing: 0.04em;
+      white-space: nowrap;
+    }
+    .module-label {
+      display: block;
+      margin-top: 4px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+    .stats {
+      display: flex;
+      align-items: stretch;
+    }
+    .stat {
+      min-width: 112px;
+      padding: 0 22px;
+      border-left: 1px solid var(--line);
+    }
+    .stat:first-child { border-left: 0; }
+    .stat span { display: block; color: var(--muted); font-size: 13px; }
+    .stat strong {
+      display: block;
+      margin-top: 3px;
+      color: var(--ink-strong);
+      font-size: 23px;
+      font-weight: 700;
+      font-variant-numeric: tabular-nums;
+    }
+    .header-actions { display: flex; gap: 12px; }
+    .button {
+      min-height: 44px;
+      padding: 10px 18px;
+      border: 1px solid var(--ink);
+      border-radius: 8px;
+      background: var(--white);
+      cursor: pointer;
+      font-weight: 700;
+      transition: background .16s ease, color .16s ease, transform .16s ease;
+    }
+    .button:hover { background: var(--brand-pale); }
+    .button:active { transform: translateY(1px); }
+    .button.primary { background: var(--ink); color: var(--white); }
+    .button.primary:hover { background: var(--ink-strong); }
+    .button.ghost { border-color: transparent; background: transparent; }
+    .button.danger { border-color: var(--danger); color: var(--danger); }
+    .button:disabled { opacity: .45; cursor: not-allowed; transform: none; }
+    .workspace {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr);
+      min-height: calc(100vh - 101px);
+    }
+    .workspace.drawer-open { grid-template-columns: minmax(0, 1fr) 400px; }
+    .main {
+      min-width: 0;
+      height: calc(100vh - 101px);
+      display: flex;
+      flex-direction: column;
+      padding: 28px 32px 32px;
+    }
+    .toolbar {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+    .search {
+      position: relative;
+      width: min(360px, 100%);
+    }
+    .search input {
+      width: 100%;
+      height: 44px;
+      padding: 10px 14px 10px 42px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      color: var(--ink);
+      background: var(--white);
+    }
+    .search::before {
+      content: "";
+      position: absolute;
+      left: 16px;
+      top: 14px;
+      width: 12px;
+      height: 12px;
+      border: 1.8px solid var(--muted);
+      border-radius: 50%;
+    }
+    .search::after {
+      content: "";
+      position: absolute;
+      left: 27px;
+      top: 26px;
+      width: 7px;
+      border-top: 1.8px solid var(--muted);
+      transform: rotate(45deg);
+      transform-origin: left;
+    }
+    .filter-note { color: var(--muted); font-size: 13px; }
+    .table-wrap {
+      flex: 1;
+      min-height: 260px;
+      overflow-x: hidden;
+      overflow-y: auto;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--white);
+    }
+    .grid {
+      width: 100%;
+      border-collapse: collapse;
+      table-layout: fixed;
+    }
+    .grid th, .grid td {
+      height: 58px;
+      padding: 10px 16px;
+      border-bottom: 1px solid var(--line);
+      text-align: left;
+      vertical-align: middle;
+    }
+    .grid th {
+      height: 54px;
+      position: sticky;
+      top: 0;
+      z-index: 2;
+      background: #fbfafa;
+      color: #55555c;
+      font-size: 13px;
+      font-weight: 700;
+    }
+    .grid tbody tr { transition: background .12s ease; }
+    .grid tbody tr:hover { background: #faf9f9; }
+    .grid tbody tr.selected { background: var(--brand-pale); }
+    .grid tbody tr:last-child td { border-bottom: 0; }
+    .col-check { width: 56px; text-align: center !important; }
+    .col-number { width: 82px; }
+    .col-date { width: 190px; }
+    .col-actions { width: 260px; }
+    input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+      accent-color: var(--ink);
+      cursor: pointer;
+    }
+    .password-cell {
+      display: inline-flex;
+      align-items: center;
+      min-height: 36px;
+      padding: 5px 8px;
+      border: 1px solid transparent;
+      border-radius: 6px;
+      color: var(--ink-strong);
+      font-family: ui-monospace, "SFMono-Regular", Consolas, monospace;
+      font-size: 14px;
+      cursor: text;
+    }
+    .password-cell:hover { border-color: var(--line); }
+    .edit-password {
+      width: min(360px, 100%);
+      height: 38px;
+      padding: 6px 10px;
+      border: 1px solid var(--ink);
+      border-radius: 6px;
+      font-family: ui-monospace, "SFMono-Regular", Consolas, monospace;
+    }
+    .row-actions { display: flex; align-items: center; gap: 8px; }
+    .text-action {
+      padding: 7px 10px;
+      border: 0;
+      border-radius: 6px;
+      background: transparent;
+      cursor: pointer;
+      color: var(--ink);
+      white-space: nowrap;
+    }
+    .text-action:hover { background: var(--brand-soft); }
+    .text-action.muted { color: var(--muted); }
+    .empty {
+      padding: 64px 24px !important;
+      text-align: center !important;
+      color: var(--muted);
+    }
+    .bulkbar {
+      display: none;
+      align-items: center;
+      gap: 10px;
+      min-height: 60px;
+      margin-top: 10px;
+      padding: 9px 16px;
+      border: 1px solid var(--line);
+      border-radius: 9px;
+      background: var(--brand-pale);
+    }
+    .bulkbar.visible { display: flex; }
+    .bulkbar .selection-count { margin-right: 8px; font-weight: 700; }
+    .bulkbar .spacer { flex: 1; }
+    .pagination {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 18px 4px 0;
+      color: var(--muted);
+      font-size: 13px;
+    }
+    .page-controls { display: flex; align-items: center; gap: 8px; }
+    .page-button {
+      min-width: 36px;
+      height: 36px;
+      border: 1px solid var(--line);
+      border-radius: 7px;
+      background: var(--white);
+      cursor: pointer;
+    }
+    .page-button:disabled { opacity: .35; cursor: not-allowed; }
+    .keyboard-hint {
+      margin-top: 18px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+    kbd {
+      padding: 2px 6px;
+      border: 1px solid var(--line-strong);
+      border-radius: 4px;
+      background: #faf9f9;
+      font: 11px/1.2 inherit;
+    }
+    .drawer {
+      display: none;
+      position: relative;
+      min-width: 0;
+      border-left: 1px solid var(--line);
+      background: #fcfbfb;
+    }
+    .workspace.drawer-open .drawer { display: block; }
+    .drawer-inner {
+      position: sticky;
+      top: 0;
+      max-height: 100vh;
+      overflow: auto;
+      padding: 28px 28px 34px;
+    }
+    .drawer-head { display: flex; align-items: center; justify-content: space-between; }
+    .drawer h2 { margin: 0; color: var(--ink-strong); font-size: 25px; font-weight: 400; }
+    .close {
+      width: 38px;
+      height: 38px;
+      border: 0;
+      border-radius: 50%;
+      background: transparent;
+      cursor: pointer;
+      font-size: 24px;
+    }
+    .close:hover { background: var(--brand-soft); }
+    .tabs {
+      display: flex;
+      gap: 24px;
+      margin: 24px 0 18px;
+      border-bottom: 1px solid var(--line);
+    }
+    .tab {
+      padding: 0 0 11px;
+      border: 0;
+      border-bottom: 2px solid transparent;
+      background: transparent;
+      cursor: pointer;
+      font-weight: 700;
+    }
+    .tab.active { border-color: var(--ink); color: var(--ink-strong); }
+    .import-help { margin: 0 0 12px; color: var(--muted); font-size: 13px; }
+    .paste-area {
+      width: 100%;
+      min-height: 238px;
+      resize: vertical;
+      padding: 14px;
+      border: 1px solid var(--line-strong);
+      border-radius: 8px;
+      background: var(--white);
+      color: var(--ink);
+      font-family: ui-monospace, "SFMono-Regular", Consolas, monospace;
+      font-size: 13px;
+      line-height: 1.6;
+    }
+    .dropzone {
+      display: none;
+      min-height: 238px;
+      padding: 34px 22px;
+      border: 1px dashed var(--line-strong);
+      border-radius: 8px;
+      background: var(--white);
+      text-align: center;
+      color: var(--muted);
+      cursor: pointer;
+    }
+    .dropzone.active { display: grid; place-items: center; }
+    .dropzone.dragover { border-color: var(--ink); background: var(--brand-pale); }
+    .dropzone strong { display: block; color: var(--ink); font-size: 16px; }
+    .file-input { display: none; }
+    .import-actions { display: flex; gap: 10px; margin-top: 12px; }
+    .preview { display: none; margin-top: 22px; }
+    .preview.visible { display: block; }
+    .preview-stats {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      overflow: hidden;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--white);
+    }
+    .preview-stat { padding: 12px 6px; text-align: center; border-left: 1px solid var(--line); }
+    .preview-stat:first-child { border-left: 0; }
+    .preview-stat strong { display: block; font-size: 18px; color: var(--ink-strong); }
+    .preview-stat span { display: block; margin-top: 2px; color: var(--muted); font-size: 10px; }
+    .dedupe-note {
+      margin: 12px 0;
+      padding: 11px 12px;
+      border-radius: 7px;
+      background: var(--brand-soft);
+      font-size: 12px;
+    }
+    .preview-list {
+      max-height: 176px;
+      overflow: auto;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--white);
+    }
+    .preview-row {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 12px;
+      padding: 9px 11px;
+      border-bottom: 1px solid var(--line);
+      font-size: 12px;
+    }
+    .preview-row:last-child { border-bottom: 0; }
+    .preview-row code { overflow: hidden; text-overflow: ellipsis; }
+    .status-new { color: var(--success); }
+    .status-duplicate { color: var(--warning); }
+    .status-invalid { color: var(--danger); }
+    .drawer-footer { display: grid; gap: 10px; margin-top: 18px; }
+    .context-menu {
+      display: none;
+      position: fixed;
+      z-index: 30;
+      width: 290px;
+      padding: 8px;
+      border: 1px solid var(--line);
+      border-radius: 9px;
+      background: var(--white);
+      box-shadow: var(--shadow);
+    }
+    .context-menu.visible { display: block; }
+    .context-menu button {
+      width: 100%;
+      padding: 10px 12px;
+      border: 0;
+      border-radius: 6px;
+      background: transparent;
+      text-align: left;
+      cursor: pointer;
+    }
+    .context-menu button:hover { background: var(--brand-pale); }
+    .context-menu hr { border: 0; border-top: 1px solid var(--line); margin: 6px 0; }
+    .context-menu .danger-item { color: var(--danger); }
+    .toast {
+      position: fixed;
+      z-index: 50;
+      left: 50%;
+      bottom: 28px;
+      max-width: min(520px, calc(100vw - 32px));
+      padding: 12px 16px;
+      border-radius: 8px;
+      background: var(--ink);
+      color: var(--white);
+      box-shadow: var(--shadow);
+      opacity: 0;
+      transform: translate(-50%, 16px);
+      pointer-events: none;
+      transition: opacity .18s ease, transform .18s ease;
+    }
+    .toast.visible { opacity: 1; transform: translate(-50%, 0); }
+    .toast.error { background: var(--danger); }
+    dialog {
+      width: min(520px, calc(100vw - 32px));
+      padding: 0;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      color: var(--ink);
+      box-shadow: var(--shadow);
+    }
+    dialog::backdrop { background: rgba(41, 43, 55, .34); }
+    .dialog-body { padding: 26px; }
+    .dialog-head { display: flex; align-items: center; justify-content: space-between; }
+    .dialog-head h2 { margin: 0; font-size: 25px; font-weight: 400; }
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin: 24px 0; }
+    .field label { display: block; margin-bottom: 6px; color: var(--muted); font-size: 13px; }
+    .field input {
+      width: 100%;
+      height: 44px;
+      padding: 9px 12px;
+      border: 1px solid var(--line-strong);
+      border-radius: 7px;
+    }
+    .dialog-actions { display: flex; justify-content: flex-end; gap: 10px; }
+    @media (max-width: 1120px) {
+      .topbar { grid-template-columns: 1fr auto; }
+      .stats { order: 3; grid-column: 1 / -1; justify-content: flex-start; }
+      .stat:first-child { padding-left: 0; }
+      .workspace.drawer-open { grid-template-columns: minmax(0, 1fr); }
+      .drawer {
+        position: fixed;
+        z-index: 20;
+        inset: 0 0 0 auto;
+        width: min(430px, 100vw);
+        box-shadow: var(--shadow);
+      }
+      .col-date { width: 160px; }
+      .col-actions { width: 220px; }
+    }
+    @media (max-width: 760px) {
+      .topbar { padding: 18px; gap: 18px; }
+      .brandline { display: block; }
+      h1 { font-size: 27px; }
+      .hotel { display: block; margin-top: 4px; }
+      .header-actions { grid-column: 1 / -1; }
+      .header-actions .button { flex: 1; }
+      .stats { overflow-x: auto; }
+      .stat { min-width: 100px; padding: 0 14px; }
+      .main { height: auto; display: block; padding: 20px 14px 28px; }
+      .toolbar { align-items: flex-start; flex-direction: column; }
+      .search { width: 100%; }
+      .table-wrap { max-height: 62vh; overflow: auto; }
+      .grid { min-width: 0; }
+      .grid th, .grid td { height: 62px; padding: 8px 7px; }
+      .grid th:nth-child(2), .grid td:nth-child(2),
+      .grid th:nth-child(4), .grid td:nth-child(4) { display: none; }
+      .col-check { width: 46px; }
+      .col-actions { width: 150px; }
+      .row-actions { gap: 2px; }
+      .text-action {
+        padding: 5px 4px;
+        white-space: normal;
+        font-size: 12px;
+        line-height: 1.15;
+      }
+      .pagination { align-items: flex-start; flex-direction: column; }
+      .bulkbar { flex-wrap: wrap; overflow: visible; }
+      .bulkbar .selection-count { width: 100%; }
+      .bulkbar .button { flex: 1 1 auto; padding-inline: 10px; }
+      .drawer-inner { padding: 22px 18px 30px; }
+      .preview-stats { grid-template-columns: repeat(2, 1fr); }
+      .preview-stat:nth-child(3) { border-left: 0; border-top: 1px solid var(--line); }
+      .preview-stat:nth-child(4) { border-top: 1px solid var(--line); }
+    }
   </style>
 </head>
 <body>
-  <div class="wrap">
-    <div class="card">
-      <h1>Генератор брошюр с Wi‑Fi паролем</h1>
-      <p class="hint">Укажите количество брошюр на русском и английском — сервис возьмёт нужное количество паролей из Google‑таблицы, удалит использованные строки и сформирует один PDF для двусторонней печати.</p>
-
-      <div class="row">
-        <div>
-          <label for="ru">Брошюры RU</label>
-          <input id="ru" type="number" min="0" step="1" value="0">
+  <div class="app-shell">
+    <header class="topbar">
+      <div>
+        <div class="brandline">
+          <h1>Wi‑Fi пароли</h1>
+          <span class="hotel" id="hotelName">ARTSTUDIO NEVSKY</span>
         </div>
-        <div>
-          <label for="en">Брошюры EN</label>
-          <input id="en" type="number" min="0" step="1" value="0">
+        <span class="module-label">Самостоятельный модуль управления отелем</span>
+      </div>
+      <div class="stats" aria-label="Статистика паролей">
+        <div class="stat"><span>Доступно</span><strong id="availableStat">—</strong></div>
+        <div class="stat"><span>В резерве</span><strong id="reservedStat">—</strong></div>
+        <div class="stat"><span>Использовано</span><strong id="usedStat">—</strong></div>
+      </div>
+      <div class="header-actions">
+        <button class="button" id="pdfButton" type="button">Сформировать PDF</button>
+        <button class="button primary" id="openImportButton" type="button">Добавить пароли</button>
+      </div>
+    </header>
+
+    <div class="workspace" id="workspace">
+      <main class="main">
+        <div class="toolbar">
+          <label class="search">
+            <span hidden>Поиск по паролю</span>
+            <input id="searchInput" type="search" placeholder="Поиск по паролю" autocomplete="off">
+          </label>
+          <span class="filter-note">Показаны только доступные пароли</span>
         </div>
-      </div>
 
-      <button id="btn">Сгенерировать PDF</button>
-      <div id="msg" class=""></div>
+        <section class="table-wrap" aria-label="Доступные Wi-Fi пароли">
+          <table class="grid" id="passwordGrid">
+            <thead>
+              <tr>
+                <th class="col-check"><input id="selectAll" type="checkbox" aria-label="Выбрать все на странице"></th>
+                <th class="col-number">№</th>
+                <th>Пароль</th>
+                <th class="col-date">Добавлен</th>
+                <th class="col-actions">Действия</th>
+              </tr>
+            </thead>
+            <tbody id="passwordRows">
+              <tr><td class="empty" colspan="5">Загружаю реестр…</td></tr>
+            </tbody>
+          </table>
+        </section>
+        <div class="bulkbar" id="bulkbar">
+          <span class="selection-count" id="selectionCount">Выбрано: 0</span>
+          <button class="button primary" id="bulkIssueButton" type="button">Скопировать и выдать</button>
+          <button class="button danger" id="bulkDeleteButton" type="button">Удалить</button>
+          <button class="button ghost" id="clearSelectionButton" type="button">Снять выделение</button>
+          <span class="spacer"></span>
+        </div>
 
-      <div class="footer">
-        Если PDF нужен в другом порядке, измените его в печати. Для редактирования дизайна откройте PPTX‑шаблоны в <code>api/templates/</code> и сохраните маркеры <code>{{PASSWORD}}</code> и <code>{{QR_WIFI}}</code>.
-      </div>
+        <div class="pagination">
+          <span id="rangeLabel">—</span>
+          <div class="page-controls">
+            <button class="page-button" id="prevPage" type="button" aria-label="Предыдущая страница">←</button>
+            <strong id="pageLabel">1</strong>
+            <button class="page-button" id="nextPage" type="button" aria-label="Следующая страница">→</button>
+          </div>
+          <span>По 25 строк</span>
+        </div>
+        <p class="keyboard-hint">
+          <kbd>Shift</kbd> — диапазон · двойной клик — изменить ·
+          <kbd>Ctrl</kbd>/<kbd>⌘</kbd> + <kbd>C</kbd> — копировать без изменения статуса ·
+          правый клик — действия
+        </p>
+      </main>
+
+      <aside class="drawer" id="importDrawer" aria-label="Добавить пароли">
+        <div class="drawer-inner">
+          <div class="drawer-head">
+            <h2>Добавить пароли</h2>
+            <button class="close" id="closeImportButton" type="button" aria-label="Закрыть">×</button>
+          </div>
+          <div class="tabs" role="tablist">
+            <button class="tab active" id="pasteTab" type="button" role="tab" aria-selected="true">Вставить текст</button>
+            <button class="tab" id="fileTab" type="button" role="tab" aria-selected="false">Загрузить файл</button>
+          </div>
+          <p class="import-help">Поддерживаются строки, пробелы, табуляция, запятые и точки с запятой.</p>
+          <textarea class="paste-area" id="passwordInput" placeholder="DXD6-DN7X&#10;QJ9O-TINK&#10;VZUX-JIL1" spellcheck="false"></textarea>
+          <label class="dropzone" id="dropzone" for="fileInput">
+            <span>
+              <strong>Перетащите TXT или CSV сюда</strong>
+              или нажмите, чтобы выбрать файл
+            </span>
+          </label>
+          <input class="file-input" id="fileInput" type="file" accept=".txt,.csv,text/plain,text/csv">
+          <div class="import-actions">
+            <button class="button" id="previewImportButton" type="button">Проверить</button>
+            <button class="button ghost" id="clearImportButton" type="button">Очистить</button>
+          </div>
+
+          <section class="preview" id="importPreview" aria-live="polite">
+            <div class="preview-stats">
+              <div class="preview-stat"><strong id="recognizedCount">0</strong><span>Распознано</span></div>
+              <div class="preview-stat"><strong id="newCount">0</strong><span>Новых</span></div>
+              <div class="preview-stat"><strong id="duplicateCount">0</strong><span>Дубликатов</span></div>
+              <div class="preview-stat"><strong id="invalidCount">0</strong><span>Проверить</span></div>
+            </div>
+            <p class="dedupe-note">Дубликаты внутри файла и уже существующие в базе не будут загружены.</p>
+            <div class="preview-list" id="previewList"></div>
+          </section>
+          <div class="drawer-footer">
+            <button class="button primary" id="commitImportButton" type="button" disabled>Добавить новые пароли</button>
+            <button class="button" id="cancelImportButton" type="button">Отмена</button>
+          </div>
+        </div>
+      </aside>
     </div>
   </div>
 
-<script>
-  const btn = document.getElementById('btn');
-  const msg = document.getElementById('msg');
-  function setMsg(text, cls){ msg.textContent = text; msg.className = cls || ''; }
+  <div class="context-menu" id="contextMenu" role="menu">
+    <button id="contextIssueButton" type="button" role="menuitem">Скопировать и выдать выбранные</button>
+    <button id="contextCopyButton" type="button" role="menuitem">Копировать без изменения статуса</button>
+    <hr>
+    <button class="danger-item" id="contextDeleteButton" type="button" role="menuitem">Удалить доступные</button>
+  </div>
 
-  btn.addEventListener('click', async () => {
-    const ru = Number(document.getElementById('ru').value || 0);
-    const en = Number(document.getElementById('en').value || 0);
+  <dialog id="pdfDialog">
+    <div class="dialog-body">
+      <div class="dialog-head">
+        <h2>Сформировать PDF</h2>
+        <button class="close" id="closePdfButton" type="button" aria-label="Закрыть">×</button>
+      </div>
+      <p class="import-help">Будут использованы самые ранние из доступных паролей.</p>
+      <div class="form-grid">
+        <div class="field">
+          <label for="ruCount">Брошюры RU</label>
+          <input id="ruCount" type="number" min="0" max="500" value="0">
+        </div>
+        <div class="field">
+          <label for="enCount">Брошюры EN</label>
+          <input id="enCount" type="number" min="0" max="500" value="0">
+        </div>
+      </div>
+      <div class="dialog-actions">
+        <button class="button" id="cancelPdfButton" type="button">Отмена</button>
+        <button class="button primary" id="generateButton" type="button">Сформировать и скачать</button>
+      </div>
+    </div>
+  </dialog>
 
-    if (!Number.isInteger(ru) || !Number.isInteger(en) || ru < 0 || en < 0) {
-      setMsg('Проверьте значения — должны быть целые числа ≥ 0.', 'err');
-      return;
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script>
+    const state = {
+      page: 1,
+      pageSize: 25,
+      items: [],
+      stats: { available: 0, reserved: 0, used: 0, total: 0 },
+      selected: new Set(),
+      lastSelectedIndex: null,
+      search: "",
+      preview: null,
+      editingId: null,
+    };
+    const byId = (id) => document.getElementById(id);
+    const workspace = byId("workspace");
+    const rowsElement = byId("passwordRows");
+    const contextMenu = byId("contextMenu");
+    let toastTimer;
+    let searchTimer;
+
+    function showToast(message, type = "ok") {
+      const toast = byId("toast");
+      toast.textContent = message;
+      toast.className = `toast visible${type === "error" ? " error" : ""}`;
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => toast.className = "toast", 3400);
     }
-    if (ru + en === 0) {
-      setMsg('Укажите хотя бы одну брошюру.', 'err');
-      return;
-    }
 
-    btn.disabled = true;
-    setMsg('Генерация…', 'hint');
-
-    try {
-      const res = await fetch('/generate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ru, en })
-      });
-
-      if (!res.ok) {
-        const t = await res.text();
-        throw new Error(t || ('HTTP ' + res.status));
+    async function errorText(response) {
+      try {
+        const data = await response.json();
+        return data.detail || JSON.stringify(data);
+      } catch {
+        return `${response.status} ${response.statusText}`;
       }
-
-      const blob = await res.blob();
-      const url = URL.createObjectURL(blob);
-
-      const a = document.createElement('a');
-      a.href = url;
-      const ts = new Date().toISOString().replace(/[:.]/g,'-');
-      a.download = `brochures-${ts}.pdf`;
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      URL.revokeObjectURL(url);
-
-      setMsg('Готово. PDF скачан.', 'ok');
-    } catch (e) {
-      setMsg('Ошибка: ' + e.message, 'err');
-    } finally {
-      btn.disabled = false;
     }
-  });
-</script>
+
+    function escapeHtml(value) {
+      return String(value)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;");
+    }
+
+    function formatDate(value) {
+      if (!value) return "—";
+      const date = new Date(value.includes("T") ? value : `${value.replace(" ", "T")}Z`);
+      if (Number.isNaN(date.getTime())) return value;
+      return new Intl.DateTimeFormat("ru-RU", {
+        day: "2-digit", month: "2-digit", year: "numeric",
+        hour: "2-digit", minute: "2-digit",
+      }).format(date);
+    }
+
+    function renderStats(stats) {
+      state.stats = stats;
+      byId("availableStat").textContent = stats.available;
+      byId("reservedStat").textContent = stats.reserved;
+      byId("usedStat").textContent = stats.used;
+    }
+
+    function renderRows() {
+      if (!state.items.length) {
+        rowsElement.innerHTML = `<tr><td class="empty" colspan="5">${
+          state.search ? "По этому запросу ничего не найдено." : "Доступных паролей пока нет."
+        }</td></tr>`;
+      } else {
+        rowsElement.innerHTML = state.items.map((item, index) => {
+          const selected = state.selected.has(item.id);
+          const rowNumber = (state.page - 1) * state.pageSize + index + 1;
+          const passwordContent = state.editingId === item.id
+            ? `<input class="edit-password" data-edit-id="${item.id}" value="${escapeHtml(item.password)}" maxlength="256" aria-label="Редактировать пароль">`
+            : `<span class="password-cell" data-password-id="${item.id}" title="Двойной клик — изменить">${escapeHtml(item.password)}</span>`;
+          return `
+            <tr data-id="${item.id}" class="${selected ? "selected" : ""}">
+              <td class="col-check"><input class="row-check" type="checkbox" data-index="${index}" data-id="${item.id}" ${selected ? "checked" : ""} aria-label="Выбрать ${escapeHtml(item.password)}"></td>
+              <td class="col-number">${rowNumber}</td>
+              <td>${passwordContent}</td>
+              <td class="col-date">${escapeHtml(formatDate(item.created_at))}</td>
+              <td class="col-actions">
+                <div class="row-actions">
+                  <button class="text-action issue-one" type="button" data-id="${item.id}">Скопировать и выдать</button>
+                  <button class="text-action muted edit-one" type="button" data-id="${item.id}">Изменить</button>
+                </div>
+              </td>
+            </tr>`;
+        }).join("");
+      }
+      syncSelectionUi();
+      if (state.editingId !== null) {
+        const input = rowsElement.querySelector(`[data-edit-id="${state.editingId}"]`);
+        input?.focus();
+        input?.select();
+      }
+    }
+
+    function syncSelectionUi() {
+      const count = state.selected.size;
+      byId("bulkbar").classList.toggle("visible", count > 0);
+      byId("selectionCount").textContent = `Выбрано: ${count}`;
+      const pageIds = state.items.map((item) => item.id);
+      const selectedOnPage = pageIds.filter((id) => state.selected.has(id)).length;
+      byId("selectAll").checked = pageIds.length > 0 && selectedOnPage === pageIds.length;
+      byId("selectAll").indeterminate = selectedOnPage > 0 && selectedOnPage < pageIds.length;
+    }
+
+    async function refreshPasswords({ preserveSelection = false } = {}) {
+      const offset = (state.page - 1) * state.pageSize;
+      const params = new URLSearchParams({
+        limit: state.pageSize,
+        offset,
+        search: state.search,
+      });
+      const response = await fetch(`/api/v1/passwords?${params}`);
+      if (!response.ok) throw new Error(await errorText(response));
+      const data = await response.json();
+      state.items = data.items;
+      if (!preserveSelection) state.selected.clear();
+      renderStats(data.stats);
+      renderRows();
+      const start = data.items.length ? offset + 1 : 0;
+      const end = offset + data.items.length;
+      byId("rangeLabel").textContent = `${start}–${end} из ${data.stats.available}`;
+      byId("pageLabel").textContent = state.page;
+      byId("prevPage").disabled = state.page === 1;
+      byId("nextPage").disabled = end >= data.stats.available || !data.items.length;
+    }
+
+    function selectedItems() {
+      return state.items.filter((item) => state.selected.has(item.id));
+    }
+
+    async function copyText(text) {
+      try {
+        await navigator.clipboard.writeText(text);
+      } catch {
+        const area = document.createElement("textarea");
+        area.value = text;
+        area.style.position = "fixed";
+        area.style.opacity = "0";
+        document.body.append(area);
+        area.select();
+        document.execCommand("copy");
+        area.remove();
+      }
+    }
+
+    async function copySelectedWithoutIssue() {
+      const items = selectedItems();
+      if (!items.length) return;
+      await copyText(items.map((item) => item.password).join("\n"));
+      showToast(`Скопировано без изменения статуса: ${items.length}`);
+      hideContextMenu();
+    }
+
+    async function issueIds(ids) {
+      if (!ids.length) return;
+      const response = await fetch("/api/v1/passwords/issue", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ids }),
+      });
+      if (!response.ok) throw new Error(await errorText(response));
+      const data = await response.json();
+      await copyText(data.passwords.join("\n"));
+      state.selected.clear();
+      renderStats(data.stats);
+      await refreshPasswords();
+      showToast(`Скопировано и отмечено использованными: ${data.issued}`);
+      hideContextMenu();
+    }
+
+    async function deleteIds(ids) {
+      if (!ids.length) return;
+      if (!window.confirm(`Удалить доступные пароли: ${ids.length}? Это действие нельзя отменить.`)) return;
+      const response = await fetch("/api/v1/passwords/delete", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ids }),
+      });
+      if (!response.ok) throw new Error(await errorText(response));
+      const data = await response.json();
+      state.selected.clear();
+      renderStats(data.stats);
+      await refreshPasswords();
+      showToast(`Удалено: ${data.deleted}`);
+      hideContextMenu();
+    }
+
+    function beginEdit(id) {
+      state.editingId = id;
+      renderRows();
+    }
+
+    async function finishEdit(input, save) {
+      const id = Number(input.dataset.editId);
+      const original = state.items.find((item) => item.id === id);
+      if (!save || !original) {
+        state.editingId = null;
+        renderRows();
+        return;
+      }
+      const value = input.value.trim();
+      if (!value || value === original.password) {
+        state.editingId = null;
+        renderRows();
+        return;
+      }
+      const response = await fetch(`/api/v1/passwords/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ password: value }),
+      });
+      if (!response.ok) throw new Error(await errorText(response));
+      state.editingId = null;
+      await refreshPasswords();
+      showToast("Пароль обновлён");
+    }
+
+    function setSelected(id, checked, index, range) {
+      if (range && state.lastSelectedIndex !== null) {
+        const start = Math.min(index, state.lastSelectedIndex);
+        const end = Math.max(index, state.lastSelectedIndex);
+        for (let i = start; i <= end; i += 1) {
+          const item = state.items[i];
+          if (item) checked ? state.selected.add(item.id) : state.selected.delete(item.id);
+        }
+      } else {
+        checked ? state.selected.add(id) : state.selected.delete(id);
+      }
+      state.lastSelectedIndex = index;
+      renderRows();
+    }
+
+    function showContextMenu(event) {
+      if (!state.selected.size) return;
+      event.preventDefault();
+      const width = 290;
+      const x = Math.min(event.clientX, window.innerWidth - width - 12);
+      const y = Math.min(event.clientY, window.innerHeight - 180);
+      contextMenu.style.left = `${Math.max(12, x)}px`;
+      contextMenu.style.top = `${Math.max(12, y)}px`;
+      contextMenu.classList.add("visible");
+    }
+
+    function hideContextMenu() {
+      contextMenu.classList.remove("visible");
+    }
+
+    function parseInput(text) {
+      return text
+        .replace(/\r/g, "\n")
+        .split(/[\n\t,; ]+/)
+        .map((value) => value.trim())
+        .filter(Boolean)
+        .slice(0, 5000);
+    }
+
+    async function previewImport() {
+      const passwords = parseInput(byId("passwordInput").value);
+      if (!passwords.length) {
+        showToast("Вставьте пароли или загрузите файл", "error");
+        return;
+      }
+      const button = byId("previewImportButton");
+      button.disabled = true;
+      try {
+        const response = await fetch("/api/v1/passwords/import/preview", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ passwords }),
+        });
+        if (!response.ok) throw new Error(await errorText(response));
+        state.preview = await response.json();
+        renderImportPreview();
+      } finally {
+        button.disabled = false;
+      }
+    }
+
+    function renderImportPreview() {
+      const { summary, items } = state.preview;
+      byId("recognizedCount").textContent = summary.recognized;
+      byId("newCount").textContent = summary.new;
+      byId("duplicateCount").textContent = summary.duplicates;
+      byId("invalidCount").textContent = summary.invalid;
+      byId("importPreview").classList.add("visible");
+      byId("commitImportButton").disabled = summary.new === 0;
+      byId("commitImportButton").textContent = `Добавить ${summary.new} новых`;
+      const notable = items.filter((item) => item.status !== "new").slice(0, 20);
+      byId("previewList").innerHTML = notable.length
+        ? notable.map((item) => `
+            <div class="preview-row">
+              <code>${escapeHtml(item.normalized || item.value || "пустая строка")}</code>
+              <span class="status-${item.status}">${escapeHtml(item.reason || item.status)}</span>
+            </div>`).join("")
+        : `<div class="preview-row"><span>Все значения готовы к добавлению.</span><span class="status-new">Новые</span></div>`;
+    }
+
+    async function commitImport() {
+      if (!state.preview) return;
+      const passwords = state.preview.items
+        .filter((item) => item.status === "new")
+        .map((item) => item.normalized);
+      if (!passwords.length) return;
+      const button = byId("commitImportButton");
+      button.disabled = true;
+      try {
+        const response = await fetch("/api/v1/passwords/import", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ passwords }),
+        });
+        if (!response.ok) throw new Error(await errorText(response));
+        const data = await response.json();
+        renderStats(data.stats);
+        closeImport();
+        state.page = 1;
+        await refreshPasswords();
+        showToast(`Добавлено: ${data.added}. Дубликаты не загружены: ${data.duplicates}.`);
+      } finally {
+        button.disabled = false;
+      }
+    }
+
+    function openImport() {
+      workspace.classList.add("drawer-open");
+      setTimeout(() => byId("passwordInput").focus(), 60);
+    }
+
+    function closeImport() {
+      workspace.classList.remove("drawer-open");
+      byId("passwordInput").value = "";
+      byId("fileInput").value = "";
+      byId("importPreview").classList.remove("visible");
+      state.preview = null;
+    }
+
+    function clearImport() {
+      byId("passwordInput").value = "";
+      byId("fileInput").value = "";
+      byId("importPreview").classList.remove("visible");
+      state.preview = null;
+      byId("commitImportButton").disabled = true;
+    }
+
+    function setImportTab(tab) {
+      const fileMode = tab === "file";
+      byId("pasteTab").classList.toggle("active", !fileMode);
+      byId("fileTab").classList.toggle("active", fileMode);
+      byId("pasteTab").setAttribute("aria-selected", String(!fileMode));
+      byId("fileTab").setAttribute("aria-selected", String(fileMode));
+      byId("passwordInput").style.display = fileMode ? "none" : "block";
+      byId("dropzone").classList.toggle("active", fileMode);
+    }
+
+    async function loadFile(file) {
+      if (!file) return;
+      if (file.size > 2_000_000) throw new Error("Файл больше 2 МБ");
+      byId("passwordInput").value = await file.text();
+      setImportTab("paste");
+      await previewImport();
+    }
+
+    async function generatePdf() {
+      const ru = Number(byId("ruCount").value || 0);
+      const en = Number(byId("enCount").value || 0);
+      if (!Number.isInteger(ru) || !Number.isInteger(en) || ru < 0 || en < 0 || ru + en < 1) {
+        showToast("Укажите количество брошюр", "error");
+        return;
+      }
+      const button = byId("generateButton");
+      button.disabled = true;
+      button.textContent = "Формирую PDF…";
+      try {
+        const response = await fetch("/api/v1/generations", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ ru, en }),
+        });
+        if (!response.ok) throw new Error(await errorText(response));
+        const blob = await response.blob();
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = `wifi-vouchers-${new Date().toISOString().replace(/[:.]/g, "-")}.pdf`;
+        document.body.append(link);
+        link.click();
+        link.remove();
+        URL.revokeObjectURL(url);
+        byId("pdfDialog").close();
+        await refreshPasswords();
+        showToast("PDF готов и скачан");
+      } finally {
+        button.disabled = false;
+        button.textContent = "Сформировать и скачать";
+      }
+    }
+
+    rowsElement.addEventListener("change", (event) => {
+      const checkbox = event.target.closest(".row-check");
+      if (!checkbox) return;
+      setSelected(
+        Number(checkbox.dataset.id),
+        checkbox.checked,
+        Number(checkbox.dataset.index),
+        event.shiftKey,
+      );
+    });
+    rowsElement.addEventListener("click", async (event) => {
+      const issue = event.target.closest(".issue-one");
+      const edit = event.target.closest(".edit-one");
+      if (issue) {
+        try { await issueIds([Number(issue.dataset.id)]); }
+        catch (error) { showToast(error.message, "error"); }
+      } else if (edit) {
+        beginEdit(Number(edit.dataset.id));
+      }
+    });
+    rowsElement.addEventListener("dblclick", (event) => {
+      const cell = event.target.closest(".password-cell");
+      if (cell) beginEdit(Number(cell.dataset.passwordId));
+    });
+    rowsElement.addEventListener("keydown", async (event) => {
+      const input = event.target.closest(".edit-password");
+      if (!input) return;
+      if (event.key === "Enter") {
+        event.preventDefault();
+        try { await finishEdit(input, true); }
+        catch (error) { showToast(error.message, "error"); }
+      } else if (event.key === "Escape") {
+        finishEdit(input, false);
+      }
+    });
+    rowsElement.addEventListener("focusout", async (event) => {
+      const input = event.target.closest(".edit-password");
+      if (!input || event.relatedTarget?.closest(".edit-password")) return;
+      try { await finishEdit(input, true); }
+      catch (error) { showToast(error.message, "error"); }
+    });
+    byId("passwordGrid").addEventListener("contextmenu", showContextMenu);
+    document.addEventListener("click", (event) => {
+      if (!event.target.closest("#contextMenu")) hideContextMenu();
+    });
+    document.addEventListener("keydown", async (event) => {
+      if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "c" && state.selected.size && !event.target.matches("input,textarea")) {
+        event.preventDefault();
+        await copySelectedWithoutIssue();
+      }
+      if (event.key === "Escape") hideContextMenu();
+    });
+    byId("selectAll").addEventListener("change", (event) => {
+      state.items.forEach((item) => event.target.checked ? state.selected.add(item.id) : state.selected.delete(item.id));
+      renderRows();
+    });
+    byId("bulkIssueButton").addEventListener("click", async () => {
+      try { await issueIds([...state.selected]); }
+      catch (error) { showToast(error.message, "error"); }
+    });
+    byId("bulkDeleteButton").addEventListener("click", async () => {
+      try { await deleteIds([...state.selected]); }
+      catch (error) { showToast(error.message, "error"); }
+    });
+    byId("clearSelectionButton").addEventListener("click", () => {
+      state.selected.clear();
+      renderRows();
+    });
+    byId("contextIssueButton").addEventListener("click", async () => {
+      try { await issueIds([...state.selected]); }
+      catch (error) { showToast(error.message, "error"); }
+    });
+    byId("contextCopyButton").addEventListener("click", copySelectedWithoutIssue);
+    byId("contextDeleteButton").addEventListener("click", async () => {
+      try { await deleteIds([...state.selected]); }
+      catch (error) { showToast(error.message, "error"); }
+    });
+    byId("searchInput").addEventListener("input", (event) => {
+      clearTimeout(searchTimer);
+      searchTimer = setTimeout(async () => {
+        state.search = event.target.value.trim();
+        state.page = 1;
+        try { await refreshPasswords(); }
+        catch (error) { showToast(error.message, "error"); }
+      }, 250);
+    });
+    byId("prevPage").addEventListener("click", async () => {
+      if (state.page > 1) {
+        state.page -= 1;
+        await refreshPasswords();
+      }
+    });
+    byId("nextPage").addEventListener("click", async () => {
+      state.page += 1;
+      await refreshPasswords();
+    });
+    byId("openImportButton").addEventListener("click", openImport);
+    byId("closeImportButton").addEventListener("click", closeImport);
+    byId("cancelImportButton").addEventListener("click", closeImport);
+    byId("pasteTab").addEventListener("click", () => setImportTab("paste"));
+    byId("fileTab").addEventListener("click", () => setImportTab("file"));
+    byId("previewImportButton").addEventListener("click", async () => {
+      try { await previewImport(); }
+      catch (error) { showToast(error.message, "error"); }
+    });
+    byId("clearImportButton").addEventListener("click", clearImport);
+    byId("commitImportButton").addEventListener("click", async () => {
+      try { await commitImport(); }
+      catch (error) { showToast(error.message, "error"); }
+    });
+    byId("fileInput").addEventListener("change", async (event) => {
+      try { await loadFile(event.target.files[0]); }
+      catch (error) { showToast(error.message, "error"); }
+    });
+    const dropzone = byId("dropzone");
+    ["dragenter", "dragover"].forEach((name) => dropzone.addEventListener(name, (event) => {
+      event.preventDefault();
+      dropzone.classList.add("dragover");
+    }));
+    ["dragleave", "drop"].forEach((name) => dropzone.addEventListener(name, (event) => {
+      event.preventDefault();
+      dropzone.classList.remove("dragover");
+    }));
+    dropzone.addEventListener("drop", async (event) => {
+      try { await loadFile(event.dataTransfer.files[0]); }
+      catch (error) { showToast(error.message, "error"); }
+    });
+    byId("pdfButton").addEventListener("click", () => byId("pdfDialog").showModal());
+    byId("closePdfButton").addEventListener("click", () => byId("pdfDialog").close());
+    byId("cancelPdfButton").addEventListener("click", () => byId("pdfDialog").close());
+    byId("generateButton").addEventListener("click", async () => {
+      try { await generatePdf(); }
+      catch (error) { showToast(error.message, "error"); }
+    });
+
+    Promise.all([
+      refreshPasswords(),
+      fetch("/api/v1/module-manifest")
+        .then((response) => response.ok ? response.json() : null)
+        .then((manifest) => {
+          if (manifest?.hotel_name) byId("hotelName").textContent = manifest.hotel_name.toUpperCase();
+        }),
+    ]).catch((error) => showToast(error.message, "error"));
+  </script>
 </body>
 </html>

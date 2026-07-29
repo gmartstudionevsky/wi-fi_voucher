@@ -1,0 +1,15 @@
+.git
+.github
+.secrets
+.venv
+backups
+data
+out
+tmp
+tests
+__pycache__
+*.db
+*.db-shm
+*.db-wal
+*.pdf
+*.pptx~
