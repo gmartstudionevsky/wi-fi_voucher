@@ -3,6 +3,7 @@ from __future__ import annotations
 import tempfile
 import asyncio
 import secrets
+import time
 from pathlib import Path
 import shutil
 from typing import Annotated
@@ -286,6 +287,7 @@ async def generate(req: GenerateRequest, background_tasks: BackgroundTasks):
 
         passwords = list(reservation.passwords)
         td = Path(tempfile.mkdtemp(prefix="brochures_"))
+        render_started = time.perf_counter()
         try:
             pdf_path = await asyncio.to_thread(
                 render_pdf,
@@ -293,6 +295,7 @@ async def generate(req: GenerateRequest, background_tasks: BackgroundTasks):
                 req.ru,
                 td,
             )
+            render_seconds = time.perf_counter() - render_started
             store.commit(reservation.batch_id)
         except Exception as error:
             store.release(reservation.batch_id, str(error)[:1000])
@@ -309,5 +312,9 @@ async def generate(req: GenerateRequest, background_tasks: BackgroundTasks):
         pdf_path,
         media_type="application/pdf",
         filename="brochures.pdf",
+        headers={
+            "Server-Timing": f"pdf;dur={render_seconds * 1000:.0f}",
+            "X-Generation-Seconds": f"{render_seconds:.3f}",
+        },
         background=background_tasks,
     )
