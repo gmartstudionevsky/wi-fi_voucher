@@ -175,6 +175,75 @@ def convert_pptx_to_pdf(
         raise RuntimeError("PDF file was not produced by LibreOffice.")
     return pdf_path
 
+
+def convert_pptx_batch_to_pdf(
+    soffice_bin: str,
+    pptx_paths: list[str],
+    out_dir: str,
+    batch_size: int = 100,
+) -> list[str]:
+    """Convert many presentations with one LibreOffice start per batch."""
+    import subprocess
+
+    if not pptx_paths:
+        return []
+    if batch_size < 1:
+        raise ValueError("batch_size must be positive")
+
+    output_dir = Path(out_dir).resolve()
+    output_dir.mkdir(parents=True, exist_ok=True)
+    resolved_paths = [Path(path).resolve() for path in pptx_paths]
+    pdf_paths: list[str] = []
+
+    for batch_index, start in enumerate(range(0, len(resolved_paths), batch_size)):
+        batch = resolved_paths[start:start + batch_size]
+        profile_dir = output_dir / f"lo_profile_batch_{batch_index:04d}"
+        profile_dir.mkdir(parents=True, exist_ok=True)
+        cmd = [
+            soffice_bin,
+            f"-env:UserInstallation={profile_dir.resolve().as_uri()}",
+            "--headless",
+            "--nologo",
+            "--nofirststartwizard",
+            "--norestore",
+            "--convert-to",
+            "pdf",
+            "--outdir",
+            str(output_dir),
+            *[str(path) for path in batch],
+        ]
+        timeout_seconds = max(120, 30 + len(batch) * 15)
+        try:
+            proc = subprocess.run(
+                cmd,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+                timeout=timeout_seconds,
+            )
+        except subprocess.TimeoutExpired as error:
+            raise RuntimeError(
+                f"LibreOffice batch conversion timed out after "
+                f"{timeout_seconds} seconds."
+            ) from error
+        if proc.returncode != 0:
+            message = proc.stderr.strip() or proc.stdout.strip()
+            raise RuntimeError(
+                f"LibreOffice batch convert failed ({proc.returncode}): "
+                f"{message}"
+            )
+
+        for pptx_path in batch:
+            pdf_path = output_dir / f"{pptx_path.stem}.pdf"
+            if not pdf_path.exists():
+                raise RuntimeError(
+                    f"PDF file was not produced by LibreOffice: "
+                    f"{pptx_path.name}"
+                )
+            pdf_paths.append(str(pdf_path))
+
+    return pdf_paths
+
 def build_merged_pdf(
     soffice_bin: str,
     template_ru: str,
@@ -189,7 +258,7 @@ def build_merged_pdf(
     pdf_dir = work / "pdf_parts"
     pdf_dir.mkdir(parents=True, exist_ok=True)
 
-    pdfs: list[str] = []
+    pptx_paths: list[str] = []
 
     # QR paths aligned: сначала RU, потом EN
     idx = 0
@@ -199,14 +268,22 @@ def build_merged_pdf(
         idx += 1
         pptx_out = work / f"ru_{i:04d}.pptx"
         render_single_brochure_pptx(template_ru, pwd, qr_png_paths[idx-1], str(pptx_out))
-        pdfs.append(convert_pptx_to_pdf(soffice_bin, str(pptx_out), str(pdf_dir)))
+        pptx_paths.append(str(pptx_out))
 
     # EN
     for i, pwd in enumerate(en_passwords, start=1):
         idx += 1
         pptx_out = work / f"en_{i:04d}.pptx"
         render_single_brochure_pptx(template_en, pwd, qr_png_paths[idx-1], str(pptx_out))
-        pdfs.append(convert_pptx_to_pdf(soffice_bin, str(pptx_out), str(pdf_dir)))
+        pptx_paths.append(str(pptx_out))
+
+    # LibreOffice startup is the expensive part. Converting the whole package
+    # in batches avoids starting a new office process for every voucher.
+    pdfs = convert_pptx_batch_to_pdf(
+        soffice_bin,
+        pptx_paths,
+        str(pdf_dir),
+    )
 
     merger = PdfMerger()
     for p in pdfs:

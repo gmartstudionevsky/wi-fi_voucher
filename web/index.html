@@ -52,14 +52,20 @@
       outline: 3px solid var(--focus);
       outline-offset: 2px;
     }
-    .app-shell { min-height: 100vh; }
+    .app-shell {
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      min-height: 0;
+    }
     .topbar {
-      min-height: 100px;
+      flex: 0 0 auto;
+      min-height: 92px;
       display: grid;
       grid-template-columns: minmax(260px, 1fr) auto auto;
       align-items: center;
-      gap: 28px;
-      padding: 20px 32px;
+      gap: 24px;
+      padding: 16px 32px;
       border-bottom: 1px solid var(--line);
       background: rgba(255, 255, 255, 0.98);
     }
@@ -122,23 +128,24 @@
     .button.danger { border-color: var(--danger); color: var(--danger); }
     .button:disabled { opacity: .45; cursor: not-allowed; transform: none; }
     .workspace {
+      flex: 1 1 auto;
       display: grid;
       grid-template-columns: minmax(0, 1fr);
-      min-height: calc(100vh - 101px);
+      min-height: 0;
     }
-    .workspace.drawer-open { grid-template-columns: minmax(0, 1fr) 400px; }
     .main {
       min-width: 0;
-      height: calc(100vh - 101px);
+      min-height: 0;
+      height: 100%;
       display: flex;
       flex-direction: column;
-      padding: 28px 32px 32px;
+      padding: 24px 32px 20px;
     }
     .toolbar {
       display: flex;
       align-items: center;
       gap: 12px;
-      margin-bottom: 18px;
+      margin-bottom: 14px;
     }
     .search {
       position: relative;
@@ -176,9 +183,8 @@
     .filter-note { color: var(--muted); font-size: 13px; }
     .table-wrap {
       flex: 1;
-      min-height: 260px;
-      overflow-x: hidden;
-      overflow-y: auto;
+      min-height: 200px;
+      overflow: auto;
       border: 1px solid var(--line);
       border-radius: var(--radius);
       background: var(--white);
@@ -189,14 +195,14 @@
       table-layout: fixed;
     }
     .grid th, .grid td {
-      height: 58px;
-      padding: 10px 16px;
+      height: 54px;
+      padding: 8px 14px;
       border-bottom: 1px solid var(--line);
       text-align: left;
       vertical-align: middle;
     }
     .grid th {
-      height: 54px;
+      height: 50px;
       position: sticky;
       top: 0;
       z-index: 2;
@@ -209,10 +215,10 @@
     .grid tbody tr:hover { background: #faf9f9; }
     .grid tbody tr.selected { background: var(--brand-pale); }
     .grid tbody tr:last-child td { border-bottom: 0; }
-    .col-check { width: 56px; text-align: center !important; }
-    .col-number { width: 82px; }
-    .col-date { width: 190px; }
-    .col-actions { width: 260px; }
+    .col-check { width: 52px; text-align: center !important; }
+    .col-number { width: 72px; }
+    .col-date { width: 180px; white-space: nowrap; }
+    .col-actions { width: 310px; }
     input[type="checkbox"] {
       width: 18px;
       height: 18px;
@@ -240,9 +246,14 @@
       border-radius: 6px;
       font-family: ui-monospace, "SFMono-Regular", Consolas, monospace;
     }
-    .row-actions { display: flex; align-items: center; gap: 8px; }
+    .row-actions {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      white-space: nowrap;
+    }
     .text-action {
-      padding: 7px 10px;
+      padding: 7px 8px;
       border: 0;
       border-radius: 6px;
       background: transparent;
@@ -276,7 +287,7 @@
       align-items: center;
       justify-content: space-between;
       gap: 16px;
-      padding: 18px 4px 0;
+      padding: 12px 4px 0;
       color: var(--muted);
       font-size: 13px;
     }
@@ -291,7 +302,7 @@
     }
     .page-button:disabled { opacity: .35; cursor: not-allowed; }
     .keyboard-hint {
-      margin-top: 18px;
+      margin: 12px 0 0;
       color: var(--muted);
       font-size: 12px;
     }
@@ -304,16 +315,29 @@
     }
     .drawer {
       display: none;
-      position: relative;
+      position: fixed;
+      z-index: 40;
+      inset: 0 0 0 auto;
+      width: clamp(390px, 29vw, 450px);
       min-width: 0;
       border-left: 1px solid var(--line);
       background: #fcfbfb;
+      box-shadow: var(--shadow);
     }
+    .drawer-backdrop {
+      display: none;
+      position: fixed;
+      z-index: 39;
+      inset: 0;
+      padding: 0;
+      border: 0;
+      background: rgba(41, 43, 55, .14);
+      cursor: default;
+    }
+    .workspace.drawer-open .drawer-backdrop { display: block; }
     .workspace.drawer-open .drawer { display: block; }
     .drawer-inner {
-      position: sticky;
-      top: 0;
-      max-height: 100vh;
+      height: 100%;
       overflow: auto;
       padding: 28px 28px 34px;
     }
@@ -480,22 +504,37 @@
       border-radius: 7px;
     }
     .dialog-actions { display: flex; justify-content: flex-end; gap: 10px; }
+    .generation-status {
+      margin: -8px 0 20px;
+      padding: 12px 14px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--brand-pale);
+      color: var(--muted);
+      font-size: 13px;
+    }
+    .generation-status strong {
+      display: block;
+      margin-bottom: 2px;
+      color: var(--ink);
+      font-size: 14px;
+    }
     @media (max-width: 1120px) {
       .topbar { grid-template-columns: 1fr auto; }
       .stats { order: 3; grid-column: 1 / -1; justify-content: flex-start; }
       .stat:first-child { padding-left: 0; }
-      .workspace.drawer-open { grid-template-columns: minmax(0, 1fr); }
       .drawer {
-        position: fixed;
-        z-index: 20;
-        inset: 0 0 0 auto;
         width: min(430px, 100vw);
-        box-shadow: var(--shadow);
       }
       .col-date { width: 160px; }
-      .col-actions { width: 220px; }
+      .col-actions { width: 286px; }
+    }
+    @media (max-width: 900px) and (min-width: 761px) {
+      .grid th:nth-child(4), .grid td:nth-child(4) { display: none; }
+      .col-actions { width: 286px; }
     }
     @media (max-width: 760px) {
+      .app-shell { height: auto; min-height: 100vh; }
       .topbar { padding: 18px; gap: 18px; }
       .brandline { display: block; }
       h1 { font-size: 27px; }
@@ -529,6 +568,13 @@
       .preview-stats { grid-template-columns: repeat(2, 1fr); }
       .preview-stat:nth-child(3) { border-left: 0; border-top: 1px solid var(--line); }
       .preview-stat:nth-child(4) { border-top: 1px solid var(--line); }
+    }
+    @media (max-height: 800px) and (min-width: 761px) {
+      .topbar { min-height: 84px; padding-top: 12px; padding-bottom: 12px; }
+      .main { padding-top: 18px; padding-bottom: 14px; }
+      .grid th, .grid td { height: 50px; }
+      .grid th { height: 46px; }
+      .keyboard-hint { margin-top: 8px; }
     }
   </style>
 </head>
@@ -603,10 +649,11 @@
         </p>
       </main>
 
-      <aside class="drawer" id="importDrawer" aria-label="Добавить пароли">
+      <button class="drawer-backdrop" id="importBackdrop" type="button" aria-label="Закрыть добавление паролей"></button>
+      <aside class="drawer" id="importDrawer" role="dialog" aria-modal="true" aria-labelledby="importDrawerTitle">
         <div class="drawer-inner">
           <div class="drawer-head">
-            <h2>Добавить пароли</h2>
+            <h2 id="importDrawerTitle">Добавить пароли</h2>
             <button class="close" id="closeImportButton" type="button" aria-label="Закрыть">×</button>
           </div>
           <div class="tabs" role="tablist">
@@ -670,6 +717,10 @@
           <input id="enCount" type="number" min="0" max="500" value="0">
         </div>
       </div>
+      <div class="generation-status" id="generationStatus" role="status" aria-live="polite" hidden>
+        <strong id="generationStatusTitle">Подготавливаем PDF</strong>
+        <span id="generationStatusDetail">Формируем карточки и собираем один файл.</span>
+      </div>
       <div class="dialog-actions">
         <button class="button" id="cancelPdfButton" type="button">Отмена</button>
         <button class="button primary" id="generateButton" type="button">Сформировать и скачать</button>
@@ -697,6 +748,7 @@
     const contextMenu = byId("contextMenu");
     let toastTimer;
     let searchTimer;
+    let generationTimer;
 
     function showToast(message, type = "ok") {
       const toast = byId("toast");
@@ -978,6 +1030,13 @@
         : `<div class="preview-row"><span>Все значения готовы к добавлению.</span><span class="status-new">Новые</span></div>`;
     }
 
+    function invalidateImportPreview() {
+      state.preview = null;
+      byId("importPreview").classList.remove("visible");
+      byId("commitImportButton").disabled = true;
+      byId("commitImportButton").textContent = "Сначала проверить пароли";
+    }
+
     async function commitImport() {
       if (!state.preview) return;
       const passwords = state.preview.items
@@ -1006,23 +1065,25 @@
 
     function openImport() {
       workspace.classList.add("drawer-open");
+      document.querySelector(".topbar").inert = true;
+      document.querySelector(".main").inert = true;
       setTimeout(() => byId("passwordInput").focus(), 60);
     }
 
     function closeImport() {
       workspace.classList.remove("drawer-open");
+      document.querySelector(".topbar").inert = false;
+      document.querySelector(".main").inert = false;
       byId("passwordInput").value = "";
       byId("fileInput").value = "";
-      byId("importPreview").classList.remove("visible");
-      state.preview = null;
+      invalidateImportPreview();
+      byId("openImportButton").focus();
     }
 
     function clearImport() {
       byId("passwordInput").value = "";
       byId("fileInput").value = "";
-      byId("importPreview").classList.remove("visible");
-      state.preview = null;
-      byId("commitImportButton").disabled = true;
+      invalidateImportPreview();
     }
 
     function setImportTab(tab) {
@@ -1051,8 +1112,25 @@
         return;
       }
       const button = byId("generateButton");
+      const statusBox = byId("generationStatus");
+      const statusTitle = byId("generationStatusTitle");
+      const statusDetail = byId("generationStatusDetail");
+      const closeButton = byId("closePdfButton");
+      const cancelButton = byId("cancelPdfButton");
+      const startedAt = performance.now();
       button.disabled = true;
-      button.textContent = "Формирую PDF…";
+      closeButton.disabled = true;
+      cancelButton.disabled = true;
+      byId("pdfDialog").setAttribute("aria-busy", "true");
+      statusBox.hidden = false;
+      statusTitle.textContent = `Готовим ${ru + en} карточек`;
+      statusDetail.textContent = "Собираем один PDF — 0 сек.";
+      button.textContent = "Формируем PDF…";
+      clearInterval(generationTimer);
+      generationTimer = setInterval(() => {
+        const seconds = Math.max(1, Math.round((performance.now() - startedAt) / 1000));
+        statusDetail.textContent = `Собираем один PDF — ${seconds} сек.`;
+      }, 1000);
       try {
         const response = await fetch("/api/v1/generations", {
           method: "POST",
@@ -1073,7 +1151,13 @@
         await refreshPasswords();
         showToast("PDF готов и скачан");
       } finally {
+        clearInterval(generationTimer);
+        generationTimer = null;
         button.disabled = false;
+        closeButton.disabled = false;
+        cancelButton.disabled = false;
+        statusBox.hidden = true;
+        byId("pdfDialog").removeAttribute("aria-busy");
         button.textContent = "Сформировать и скачать";
       }
     }
@@ -1128,7 +1212,10 @@
         event.preventDefault();
         await copySelectedWithoutIssue();
       }
-      if (event.key === "Escape") hideContextMenu();
+      if (event.key === "Escape") {
+        hideContextMenu();
+        if (workspace.classList.contains("drawer-open")) closeImport();
+      }
     });
     byId("selectAll").addEventListener("change", (event) => {
       state.items.forEach((item) => event.target.checked ? state.selected.add(item.id) : state.selected.delete(item.id));
@@ -1176,6 +1263,7 @@
     });
     byId("openImportButton").addEventListener("click", openImport);
     byId("closeImportButton").addEventListener("click", closeImport);
+    byId("importBackdrop").addEventListener("click", closeImport);
     byId("cancelImportButton").addEventListener("click", closeImport);
     byId("pasteTab").addEventListener("click", () => setImportTab("paste"));
     byId("fileTab").addEventListener("click", () => setImportTab("file"));
@@ -1184,6 +1272,7 @@
       catch (error) { showToast(error.message, "error"); }
     });
     byId("clearImportButton").addEventListener("click", clearImport);
+    byId("passwordInput").addEventListener("input", invalidateImportPreview);
     byId("commitImportButton").addEventListener("click", async () => {
       try { await commitImport(); }
       catch (error) { showToast(error.message, "error"); }
