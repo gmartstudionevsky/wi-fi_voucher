@@ -11,5 +11,11 @@ __pycache__/
 # Outputs
 out/
 tmp/
+data/
+backups/
+artifacts/
+*.db
+*.db-shm
+*.db-wal
 *.pdf
 *.pptx~

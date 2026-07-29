@@ -1,0 +1,29 @@
+services:
+  app:
+    build: .
+    image: wifi-voucher:local
+    restart: unless-stopped
+    ports:
+      - "${APP_PORT:-8080}:8080"
+    environment:
+      DATABASE_PATH: /data/vouchers.db
+      DATABASE_URL: "${DATABASE_URL:-}"
+      ENVIRONMENT: "${ENVIRONMENT:-development}"
+      HOTEL_ID: "${HOTEL_ID:-artstudio-nevsky}"
+      HOTEL_NAME: "${HOTEL_NAME:-ARTSTUDIO NEVSKY}"
+      RESERVATION_TTL_MINUTES: "${RESERVATION_TTL_MINUTES:-15}"
+      CORS_ORIGINS: "${CORS_ORIGINS:-}"
+      ADMIN_USERNAME: "${ADMIN_USERNAME:-admin}"
+      ADMIN_PASSWORD: "${ADMIN_PASSWORD:?Set ADMIN_PASSWORD in .env}"
+    volumes:
+      - ./data:/data
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8080/health', timeout=3)"
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
