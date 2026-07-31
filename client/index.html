@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#292b37">
+  <meta name="description" content="Управление Wi-Fi паролями ARTSTUDIO NEVSKY">
+  <title>ARTSTUDIO — Wi-Fi пароли</title>
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <div class="auth-shell" id="authScreen">
+    <main class="auth-card" aria-labelledby="authTitle">
+      <div class="auth-mark" aria-hidden="true">A</div>
+      <p class="eyebrow">ARTSTUDIO NEVSKY</p>
+      <h1 id="authTitle">Wi-Fi пароли</h1>
+      <p class="auth-lead">Внутренний модуль управления ваучерами. Войдите с рабочей почтой — доступ сохранится на этом устройстве.</p>
+      <form id="loginForm">
+        <label class="field-label" for="emailInput">Рабочая почта</label>
+        <input class="text-input" id="emailInput" name="email" type="email" autocomplete="email" inputmode="email" required placeholder="name@artstudio.ru">
+        <label class="field-label" for="passwordInputAuth">Пароль</label>
+        <input class="text-input" id="passwordInputAuth" name="password" type="password" autocomplete="current-password" placeholder="Если пароль уже установлен">
+        <button class="button primary wide" id="signInButton" type="submit">Войти</button>
+        <button class="button wide" id="magicLinkButton" type="button">Получить ссылку для входа</button>
+      </form>
+      <p class="auth-status" id="authStatus" role="status" aria-live="polite"></p>
+      <p class="security-note">Пароли провайдера не сохраняются на этом устройстве. Доступ проверяется при каждой операции.</p>
+    </main>
+  </div>
+
+  <div class="app-shell" id="appScreen" hidden>
+    <header class="topbar">
+      <div class="brand-block">
+        <div class="brandline">
+          <h1>Wi-Fi пароли</h1>
+          <span class="hotel" id="hotelName">ARTSTUDIO NEVSKY</span>
+        </div>
+        <span class="module-label">Самостоятельный модуль управления отелем</span>
+      </div>
+
+      <div class="stats" aria-label="Статистика паролей">
+        <div class="stat"><span>Доступно</span><strong id="availableStat">—</strong></div>
+        <div class="stat"><span>В резерве</span><strong id="reservedStat">—</strong></div>
+        <div class="stat"><span>Использовано</span><strong id="usedStat">—</strong></div>
+      </div>
+
+      <div class="header-actions">
+        <button class="button" id="pdfButton" type="button">Сформировать PDF</button>
+        <button class="button primary" id="openImportButton" type="button">Добавить пароли</button>
+        <button class="account-button" id="accountButton" type="button" aria-label="Открыть меню пользователя" aria-expanded="false">
+          <span class="account-dot" aria-hidden="true"></span>
+          <span class="account-name" id="accountName">Профиль</span>
+        </button>
+      </div>
+      <div class="account-menu" id="accountMenu" hidden>
+        <strong id="accountEmail"></strong>
+        <span id="accountRole"></span>
+        <button type="button" id="signOutButton">Выйти на этом устройстве</button>
+      </div>
+    </header>
+
+    <div class="connection-banner" id="connectionBanner" hidden role="status">
+      <span class="spinner" aria-hidden="true"></span>
+      <span id="connectionText">Восстанавливаем соединение…</span>
+      <button type="button" id="retryButton">Повторить сейчас</button>
+    </div>
+
+    <div class="workspace" id="workspace">
+      <main class="main">
+        <div class="toolbar">
+          <label class="search">
+            <span class="visually-hidden">Поиск по паролю</span>
+            <input id="searchInput" type="search" placeholder="Поиск по паролю" autocomplete="off">
+          </label>
+          <span class="filter-note">Показаны только доступные пароли</span>
+          <button class="refresh-button" id="refreshButton" type="button" title="Обновить таблицу">Обновить</button>
+        </div>
+
+        <section class="table-wrap" aria-label="Доступные Wi-Fi пароли">
+          <table class="grid" id="passwordGrid">
+            <thead><tr>
+              <th class="col-check"><input id="selectAll" type="checkbox" aria-label="Выбрать все на странице"></th>
+              <th class="col-number">№</th>
+              <th>Пароль</th>
+              <th class="col-date">Добавлен</th>
+              <th class="col-actions">Действия</th>
+            </tr></thead>
+            <tbody id="passwordRows"><tr><td class="empty" colspan="5">Загружаю реестр…</td></tr></tbody>
+          </table>
+        </section>
+
+        <div class="bulkbar" id="bulkbar">
+          <span class="selection-count" id="selectionCount">Выбрано: 0</span>
+          <button class="button primary" id="bulkIssueButton" type="button">Скопировать и выдать</button>
+          <button class="button danger" id="bulkDeleteButton" type="button">Удалить</button>
+          <button class="button ghost" id="clearSelectionButton" type="button">Снять выделение</button>
+        </div>
+
+        <div class="pagination">
+          <span id="rangeLabel">—</span>
+          <div class="page-controls">
+            <button class="page-button" id="prevPage" type="button" aria-label="Предыдущая страница">←</button>
+            <span id="pageLabel">1</span>
+            <button class="page-button" id="nextPage" type="button" aria-label="Следующая страница">→</button>
+          </div>
+          <span>По 25 строк</span>
+        </div>
+        <p class="keyboard-hint"><kbd>Shift</kbd> — диапазон · двойной клик — изменить · <kbd>Ctrl</kbd>/<kbd>⌘</kbd> + <kbd>C</kbd> — копировать без выдачи · правый клик — действия</p>
+      </main>
+
+      <button class="drawer-backdrop" id="importBackdrop" type="button" aria-label="Закрыть добавление паролей"></button>
+      <aside class="drawer" id="importDrawer" aria-labelledby="importTitle">
+        <div class="drawer-inner">
+          <div class="drawer-head"><h2 id="importTitle">Добавить пароли</h2><button class="close" id="closeImportButton" type="button" aria-label="Закрыть">×</button></div>
+          <div class="tabs" role="tablist">
+            <button class="tab active" id="pasteTab" type="button" role="tab" aria-selected="true">Вставить текст</button>
+            <button class="tab" id="fileTab" type="button" role="tab" aria-selected="false">Загрузить файл</button>
+          </div>
+          <p class="import-help">Поддерживаются строки, пробелы, табуляция, запятые и точки с запятой.</p>
+          <textarea class="paste-area" id="passwordInput" placeholder="DXD6-DN7X&#10;QJ9O-TINK&#10;VZUX-JIL1" spellcheck="false"></textarea>
+          <label class="dropzone" id="dropzone" for="fileInput"><span><strong>Перетащите TXT или CSV сюда</strong>или нажмите, чтобы выбрать файл</span></label>
+          <input class="file-input" id="fileInput" type="file" accept=".txt,.csv,text/plain,text/csv">
+          <div class="import-actions"><button class="button" id="previewImportButton" type="button">Проверить</button><button class="button ghost" id="clearImportButton" type="button">Очистить</button></div>
+          <section class="preview" id="importPreview" aria-live="polite">
+            <div class="preview-stats">
+              <div class="preview-stat"><strong id="recognizedCount">0</strong><span>распознано</span></div>
+              <div class="preview-stat"><strong id="newCount">0</strong><span>новых</span></div>
+              <div class="preview-stat"><strong id="duplicateCount">0</strong><span>дубликатов</span></div>
+              <div class="preview-stat"><strong id="invalidCount">0</strong><span>ошибок</span></div>
+            </div>
+            <p class="dedupe-note">Дубликаты внутри файла и уже находящиеся в базе не будут добавлены.</p>
+            <div class="preview-list" id="previewList"></div>
+          </section>
+          <div class="drawer-footer"><button class="button primary wide" id="commitImportButton" type="button" disabled>Сначала проверить пароли</button><button class="button wide" id="cancelImportButton" type="button">Отмена</button></div>
+        </div>
+      </aside>
+    </div>
+
+    <div class="context-menu" id="contextMenu" role="menu">
+      <button id="contextIssueButton" type="button">Скопировать и отметить использованными</button>
+      <button id="contextCopyButton" type="button">Скопировать без изменения статуса</button>
+      <hr><button class="danger-item" id="contextDeleteButton" type="button">Удалить доступные</button>
+    </div>
+  </div>
+
+  <dialog id="pdfDialog">
+    <div class="dialog-body">
+      <div class="dialog-head"><h2>Сформировать PDF</h2><button class="close" id="closePdfButton" type="button" aria-label="Закрыть">×</button></div>
+      <p class="import-help">Используем самые ранние доступные пароли. Файл формируется прямо на вашем устройстве.</p>
+      <div class="form-grid">
+        <div><label class="field-label" for="ruCount">Брошюры RU</label><input class="text-input" id="ruCount" type="number" min="0" max="500" value="0"></div>
+        <div><label class="field-label" for="enCount">Брошюры EN</label><input class="text-input" id="enCount" type="number" min="0" max="500" value="0"></div>
+      </div>
+      <div class="generation-status" id="generationStatus" role="status" aria-live="polite" hidden>
+        <strong id="generationStatusTitle">Подготавливаем PDF</strong><span id="generationStatusDetail">Загружаем шаблон…</span>
+        <progress id="generationProgress" max="100" value="0"></progress>
+      </div>
+      <div class="dialog-actions"><button class="button" id="cancelPdfButton" type="button">Отмена</button><button class="button primary" id="generateButton" type="button">Сформировать и скачать</button></div>
+    </div>
+  </dialog>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <script type="module" src="/app.js"></script>
+</body>
+</html>

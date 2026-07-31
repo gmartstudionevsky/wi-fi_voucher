@@ -1,0 +1,44 @@
+{
+  "templates": {
+    "ru": {
+      "language": "ru",
+      "slide_width": 10693400,
+      "slide_height": 7556500,
+      "password": {
+        "page": 1,
+        "left": 825937,
+        "top": 3676960,
+        "width": 2350430,
+        "height": 396262
+      },
+      "qr": {
+        "page": 1,
+        "left": 1051974,
+        "top": 5113311,
+        "width": 1307902,
+        "height": 1306800
+      },
+      "file": "/templates/brochure_ru.pdf"
+    },
+    "en": {
+      "language": "en",
+      "slide_width": 10693400,
+      "slide_height": 7556500,
+      "password": {
+        "page": 1,
+        "left": 980939,
+        "top": 3676960,
+        "width": 2350430,
+        "height": 396262
+      },
+      "qr": {
+        "page": 1,
+        "left": 1051974,
+        "top": 5113311,
+        "width": 1307902,
+        "height": 1306800
+      },
+      "file": "/templates/brochure_en.pdf"
+    }
+  }
+}

@@ -1,6 +1,8 @@
 # Secrets
 .secrets/
 *.json
+!package.json
+!web/public/templates/layout.json
 
 # Python
 __pycache__/
@@ -14,8 +16,12 @@ tmp/
 data/
 backups/
 artifacts/
+dist/
+node_modules/
+supabase/.temp/
 *.db
 *.db-shm
 *.db-wal
 *.pdf
+!web/public/templates/*.pdf
 *.pptx~
